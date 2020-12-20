@@ -43,29 +43,37 @@ while True:
 
     print("input: " + inputQuery)
 
-    try: # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
-        wiki_res = wp.summary(inputQuery,sentences=2)
-        res = client.query(inputQuery)
-        wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
-        engine.say(wolfram_res)
-        sg.PopupNonBlocking("Wolfram Result: " + wolfram_res, "Wikipedia Result: " + wiki_res, location=(1150, 0))
-    except (wp.exceptions.DisambiguationError,wp.exceptions.PageError): # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
-        try:
+    # ᕙ(`▿´)ᕗ If search is in query, look in wikipedia and wolframalpha ᕙ(`▿´)ᕗ
+    if inputQuery.__contains__("search"):
+        try: # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
+            wiki_res = wp.summary(inputQuery,sentences=2)
             res = client.query(inputQuery)
             wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
             engine.say(wolfram_res)
-            sg.PopupNonBlocking(wolfram_res, location=(1150, 0))
-        except (StopIteration,AttributeError): # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
+
+            sg.PopupNonBlocking("Wolfram Result: " + wolfram_res, "Wikipedia Result: " + wiki_res, location=(1150, 0))
+
+        except (wp.exceptions.DisambiguationError,wp.exceptions.PageError): # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
+            try:
+                res = client.query(inputQuery)
+                wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+                engine.say(wolfram_res)
+                sg.PopupNonBlockding(wolfram_res, location=(1150, 0))
+            except (StopIteration,AttributeError): # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
+                engine.say("No results found")
+        except (StopIteration,AttributeError):
+            try:
+                wiki_res = wp.summary(inputQuery,sentences=2)
+                sg.PopupNonBlocking(wiki_res, location=(1150, 0))
+            except:
+                engine.say("No results found")
+        except: # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
             engine.say("No results found")
-    except (StopIteration,AttributeError):
-        try:
-            wiki_res = wp.summary(inputQuery,sentences=2)
-            sg.PopupNonBlocking(wiki_res, location=(1150, 0))
-        except:
-            engine.say("No results found")
-    except: # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        engine.say("No results found")
-        sg.PopupNonBlocking("No results found", location=(1150, 0))
+            sg.PopupNonBlocking("No results found", location=(1150, 0))
+
+    else:
+        print("test")
+
     print('You entered ', inputQuery) # ᕙ(`▿´)ᕗ Print input ᕙ(`▿´)ᕗ
     engine.runAndWait()
 
