@@ -1,10 +1,12 @@
 import wolframalpha as wa
 import PySimpleGUI as sg
 import wikipedia as wp
+import speech_recognition as sr
 
 # ᕙ(`▿´)ᕗ Connect to wolfram ᕙ(`▿´)ᕗ
 app_id = 'QW82JW-Q5U44TYEE9'  # get your own at https://products.wolframalpha.com/api/
 client = wa.Client(app_id)
+
 
 
 import pyttsx3
