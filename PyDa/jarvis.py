@@ -4,6 +4,7 @@ import wikipedia as wp
 import pyttsx3
 import speech_recognition as sr
 
+# ᕙ(`▿´)ᕗ Speech recognition setup ᕙ(`▿´)ᕗ
 recognizer = sr.Recognizer()
 mic = sr.Microphone()
 
@@ -11,6 +12,7 @@ mic = sr.Microphone()
 app_id = 'QW82JW-Q5U44TYEE9'  # get your own at https://products.wolframalpha.com/api/
 client = wa.Client(app_id)
 
+# ᕙ(`▿´)ᕗ Text To Speech setup
 engine = pyttsx3.init()
 
 sg.theme('DarkBlack1')   # ᕙ(`▿´)ᕗ Get the specific theme [Light/Dark][Colour][number optional] ᕙ(`▿´)ᕗ
