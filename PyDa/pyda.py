@@ -7,6 +7,9 @@ app_id = 'QW82JW-Q5U44TYEE9'  # get your own at https://products.wolframalpha.co
 client = wa.Client(app_id)
 
 
+import pyttsx3
+engine = pyttsx3.init()
+
 sg.theme('DarkBlack1')   # ᕙ(`▿´)ᕗ Get the specific theme [Light/Dark][Colour][number optional] ᕙ(`▿´)ᕗ
 
 # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
@@ -23,12 +26,29 @@ while True:
     if event == sg.WIN_CLOSED or event == 'Cancel': # ᕙ(`▿´)ᕗ if user closes window or clicks cancel ᕙ(`▿´)ᕗ
         break
 
+    try:
+        wiki_res = wp.summary(values[0],sentences=2)
+        res = client.query(values[0])
+        wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+        engine.say(wolfram_res)
+        sg.PopupNonBlocking("Wolfram Result: " + wolfram_res, "Wikipedia Result: " + wiki_res)
+    except (wp.exceptions.DisambiguationError,wp.exceptions.PageError):
+        try:
+            res = client.query(values[0])
+            wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+            engine.say(wolfram_res)
+            sg.PopupNonBlocking(wolfram_res)
+        except (StopIteration,AttributeError):
+            engine.say("No results found")
+
+    except:
+        engine.say("No results found")
+        sg.PopupNonBlocking("No results found")
     print('You entered ', values[0]) # ᕙ(`▿´)ᕗ Print input ᕙ(`▿´)ᕗ
-    res = client.query(values[0])
-    
-    wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
-    wiki_res = wp.summary(values[0],sentences=3)
-    sg.Popup("Wolfram Result: " + wolfram_res, "Wikipedia Result: " + wiki_res)
+
+
+#    engine.say("Wikipedia Result: " + wiki_res)
+    engine.runAndWait()
 
 window.close()
 
