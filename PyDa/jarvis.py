@@ -1,8 +1,17 @@
+import datetime
+
 import wolframalpha as wa
 import PySimpleGUI as sg
 import wikipedia as wp
 import pyttsx3
 import speech_recognition as sr
+import threading
+import datefinder
+import time
+
+def alarm_func():
+    print("timer done")
+    engine.say("timer is done")
 
 # ᕙ(`▿´)ᕗ Speech recognition setup ᕙ(`▿´)ᕗ
 recognizer = sr.Recognizer()
@@ -27,6 +36,7 @@ window = sg.Window('JARVIS', layout) # ᕙ(`▿´)ᕗ Create the Window ᕙ(`▿
 
 # ᕙ(`▿´)ᕗ Event Loop to process "events" and get the "values" of the inputs ᕙ(`▿´)ᕗ
 while True:
+    record = False
     event, values = window.read()
     if event == sg.WIN_CLOSED or event == 'Cancel': # ᕙ(`▿´)ᕗ if user closes window or clicks cancel ᕙ(`▿´)ᕗ
         break
@@ -40,11 +50,13 @@ while True:
             output = recognizer.recognize_google(audio)
             inputQuery = output
             print(output)
+            record = True
 
     print("input: " + inputQuery)
 
     # ᕙ(`▿´)ᕗ If search is in query, look in wikipedia and wolframalpha ᕙ(`▿´)ᕗ
     if inputQuery.__contains__("search"):
+        inputQuery = inputQuery.replace("search","")
         try: # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
             wiki_res = wp.summary(inputQuery,sentences=2)
             res = client.query(inputQuery)
@@ -71,10 +83,39 @@ while True:
             engine.say("No results found")
             sg.PopupNonBlocking("No results found", location=(1150, 0))
 
+    elif inputQuery.__contains__("alarm"):
+        timeGoal = datetime.datetime(2002, 2, 11)
+        if record == True:
+            time.sleep(5)
+            print("go")
+            with mic as source:
+                audio = recognizer.listen(source)
+
+            output = recognizer.recognize_google(audio)
+            matches = datefinder.find_dates(output)
+            for match in matches:
+                print(match,'!')
+                timeGoal = match
+            print(output)
+
+        # datetime(year, month, day, hour, minute, second)
+        a = timeGoal
+        b = datetime.datetime.now()
+
+        # returns a timedelta object
+        c = a-b
+        print('Difference: ', c)
+
+        minutes = c.total_seconds() / 60
+        print('Total difference in minutes: ', minutes)
+
+        timer = threading.Timer(minutes,alarm_func)
+        timer.start()
     else:
-        print("test")
+        print("Command not recognized")
 
     print('You entered ', inputQuery) # ᕙ(`▿´)ᕗ Print input ᕙ(`▿´)ᕗ
     engine.runAndWait()
 
 window.close()
+
