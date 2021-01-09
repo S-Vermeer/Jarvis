@@ -1,7 +1,8 @@
 import listener
 import talker
 
-WAKE_WORD = ["whaddup phillip", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy"]
+
+WAKE_WORD = ["whaddup philip", "yo philip", "my boy philip", "hey philip", "yo philly boy"]
 print("Start")
 while True:
     try:
@@ -11,7 +12,11 @@ while True:
             if TEXT.count(wakeword) >= 1:
                 talker.speak("Poggers")
                 TEXT = listener.get_audio()
+        if TEXT.count('stop') >= 1:
+            exit()
     except Exception as e:
         print("ohnoes")
+        if hasattr(e, 'message'):
+            print(e.message)
         print(e)
         exit()
