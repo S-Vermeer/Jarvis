@@ -1,4 +1,3 @@
 wolframalpha
-PySimpleGUI
 wikipedia
 SpeechRecognition

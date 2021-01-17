@@ -1,9 +1,16 @@
 import talker
 import listener
 import wikipedia as wp
+#import connector
+import wolframalpha as wa
 
-from PyDa import connector
 
+
+app_id = 'QW82JW-Q5U44TYEE9'  # get your own at https://products.wolframalpha.com/api/
+
+def connect_wa():
+    client = wa.Client(app_id)
+    return client
 
 def awoken():
     talker.speak("poggers")
@@ -11,7 +18,7 @@ def awoken():
     return TEXT
 
 def search_internet(inputQuery):
-    client = connector.connect_wa()
+    client = connect_wa()
     try: # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
         wiki_res = wp.summary(inputQuery,sentences=2)
         res = client.query(inputQuery)
