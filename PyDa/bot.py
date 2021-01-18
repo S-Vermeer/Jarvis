@@ -31,8 +31,25 @@ async def on_message(message):
     phillip_names = ["whaddup phillip", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy", "phillip", "p.h.i.l.l.i.p.", "p.h.i.l.l.i.p"]
 
     for name in phillip_names:
-        if message.content == name:
+        if message.content.lower() == name:
             response = 'At your service'
             await message.channel.send(response)
+
+    if message.content.lower() == 'stop':
+        await message.channel.send('Shutting down')
+        await client.logout()
+
+    brooklyn_99_quotes = [
+        'I\'m the human form of the 💯 emoji.',
+        'Bingpot!',
+        (
+            'Cool. Cool cool cool cool cool cool cool, '
+            'no doubt no doubt no doubt no doubt.'
+        ),
+    ]
+
+    if message.content == '99!':
+        response = random.choice(brooklyn_99_quotes)
+        await message.channel.send(response)
 
 client.run(TOKEN)

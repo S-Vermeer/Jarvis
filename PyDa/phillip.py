@@ -8,7 +8,5 @@ while True:
         listener.shutdown(TEXT)
     except Exception as e:
         print("ohnoes")
-        if hasattr(e, 'message'):
-            print(e.message)
-        print(e)
+        print(repr(e))
         exit()
