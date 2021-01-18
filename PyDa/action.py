@@ -1,12 +1,14 @@
 import talker
 import listener
 import wikipedia as wp
+
+import os
+from dotenv import load_dotenv
 #import connector
 import wolframalpha as wa
 
-
-
-app_id = 'QW82JW-Q5U44TYEE9'  # get your own at https://products.wolframalpha.com/api/
+load_dotenv()
+app_id = os.getenv('APP_ID')
 
 def connect_wa():
     client = wa.Client(app_id)
@@ -25,10 +27,10 @@ def search_internet(inputQuery):
         wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
         talker.speak(wolfram_res)
 
-        answer = "Wolfram Result: " + wolfram_res + "Wikipedia Result: " + wiki_res
+        answer = "Wolfram Result: " + wolfram_res + " \n Wikipedia Result: " + wiki_res
         return answer
 
-    except (wp.exceptions.DisambiguationError,wp.exceptions.PageError): # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
+    except (wp.exceptions.DisambiguationError,wp.exceptions.PageError,wp.exceptions.WikipediaException): # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
         try:
             res = client.query(inputQuery)
             wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
