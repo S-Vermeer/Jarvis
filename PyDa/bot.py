@@ -1,12 +1,13 @@
 import os
 import random
-import asyncio
 
 import discord
 from dotenv import load_dotenv
 
 import wikipedia as wp
 import wolframalpha as wa
+
+import discordcommands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -17,7 +18,6 @@ intents.members = True
 intents.reactions = True
 
 client = discord.Client(intents=intents)
-
 
 def connect_wa():
     client = wa.Client(app_id)
@@ -31,7 +31,8 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})\n'
     )
 
-#    members = '\n - '.join([member.name for member in guild.members])
+    members = '\n - '.join([member.name for member in guild.members])
+    print(len(guild.members))
 #    print(f'Guild Members:\n - {members}')
 
 @client.event
@@ -39,33 +40,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    phillip_names = ["whaddup phillip", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy", "phillip", "p.h.i.l.l.i.p.", "p.h.i.l.l.i.p"]
-    for name in phillip_names:
-        if message.content.lower() == name:
-            response = 'At your service'
-            await message.channel.send(response)
-            try:
-                await message.add_reaction('👍')
-                msg = await client.wait_for('message', check=check(message.author), timeout=15)
-
-                if msg.content == "How are you":
-                    response = 'Well I can respond, thats something'
-                await message.channel.send(response)
-
-                if msg.content.lower().count("search") >= 1:
-                    answer = search_internet(msg.content,message)
-
-                    msg = await message.channel.send(answer[0])
-
-                    if len(answer) > 1:
-                        await msg.add_reaction('👍')
-                        @client.event
-                        async def on_reaction_add(reaction, user):
-                            if reaction.emoji == '👍' and user.id != client.user.id:
-                                await message.channel.send(answer[1])
-            except:
-                await message.remove_reaction('👍',client.user)
-
+    await discordcommands.callingCommand(message,client,app_id)
 
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
