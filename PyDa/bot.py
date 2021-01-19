@@ -1,5 +1,6 @@
 import os
 import random
+import asyncio
 
 import discord
 from dotenv import load_dotenv
@@ -43,23 +44,27 @@ async def on_message(message):
         if message.content.lower() == name:
             response = 'At your service'
             await message.channel.send(response)
-            msg = await client.wait_for('message', check=check(message.author), timeout=15)
+            try:
+                await message.add_reaction('👍')
+                msg = await client.wait_for('message', check=check(message.author), timeout=15)
 
-            if msg.content == "How are you":
-                response = 'Well I can respond, thats something'
+                if msg.content == "How are you":
+                    response = 'Well I can respond, thats something'
                 await message.channel.send(response)
 
-            if msg.content.lower().count("search") >= 1:
-                answer = search_internet(msg.content,message)
+                if msg.content.lower().count("search") >= 1:
+                    answer = search_internet(msg.content,message)
 
-                msg = await message.channel.send(answer[0])
+                    msg = await message.channel.send(answer[0])
 
-                if len(answer) > 1:
-                    await msg.add_reaction('👍')
-                    @client.event
-                    async def on_reaction_add(reaction, user):
-                        if reaction.emoji == '👍' and user.id != client.user.id:
-                            await message.channel.send(answer[1])
+                    if len(answer) > 1:
+                        await msg.add_reaction('👍')
+                        @client.event
+                        async def on_reaction_add(reaction, user):
+                            if reaction.emoji == '👍' and user.id != client.user.id:
+                                await message.channel.send(answer[1])
+            except:
+                await message.remove_reaction('👍',client.user)
 
 
     if message.content.lower() == 'stop':
