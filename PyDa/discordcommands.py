@@ -20,7 +20,7 @@ async def searchMethod(msg,message,app_id,client):
         return sleepHelper(msg)
 
     if msg.content.lower().count("hype") >= 1:
-        return complimenter(msg)
+        return complimenter(msg,client)
     
     if msg.content.lower().count("jesse"):
         return jesseHype(msg)
@@ -59,8 +59,8 @@ async def sleepHelper(message):
     response = (random.choice(dictionary.sleep_encouragements) % message.mentions[0].mention)
     await message.channel.send(response)
 
-async def complimenter(message):
-    response = random.choice(dictionary.compliments)
+async def complimenter(message,client):
+    response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
     await message.channel.send(response)
 
 async def jesseHype(message):

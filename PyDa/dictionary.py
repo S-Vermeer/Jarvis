@@ -8,10 +8,10 @@ brooklyn_99_quotes = [
 ]
 
 compliments = [
-    "you are awesome",
-    "I believe in you",
-    "you know who I love? You /p",
-    "Error - Can not compute how much I love you /p"
+    "you are awesome, %s,",
+    "I believe in you, %s",
+    "you know who I love? %s /p",
+    "Error - Can not compute how much I love %s /p"
 ]
 
 sleep_encouragements = [
