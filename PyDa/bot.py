@@ -1,6 +1,8 @@
 import os
 import random
 
+import logging
+
 import discord
 from dotenv import load_dotenv
 
@@ -27,7 +29,7 @@ def connect_wa():
 @client.event
 async def on_ready():
     guild = discord.utils.get(client.guilds, name=GUILD)
-    print(
+    logging.info(
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
