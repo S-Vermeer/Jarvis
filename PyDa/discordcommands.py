@@ -27,7 +27,7 @@ async def searchMethod(msg,message,app_id,client):
 
 
 async def callingCommand(message,client,app_id):
-    phillip_names = ["whaddup phillip", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy", "phillip", "p.h.i.l.l.i.p.", "p.h.i.l.l.i.p"]
+    phillip_names = ["whaddup phillip", "my son", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy", "phillip", "p.h.i.l.l.i.p.", "p.h.i.l.l.i.p"]
     for name in phillip_names:
         if message.content.lower() == name:
             response = 'At your service'

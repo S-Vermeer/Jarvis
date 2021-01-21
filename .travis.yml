@@ -27,3 +27,13 @@ after_failure:
 services:
   - docker
 
+notifications:
+  webhooks:
+    urls:
+      - http://31.187.231.118:9000/api/webhooks/ae98d030-0736-4227-9ac8-c31a948a0109
+    on_success: always
+    on_failure: never
+    on_cancel: never
+    on_start: never
+    on_error: never
+
