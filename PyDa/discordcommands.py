@@ -21,6 +21,9 @@ async def searchMethod(msg,message,app_id,client):
 
     if msg.content.lower().count("hype") >= 1:
         return complimenter(msg)
+    
+    if msg.content.lower().count("jesse"):
+        return jesseHype(msg)
 
 
 async def callingCommand(message,client,app_id):
@@ -59,6 +62,12 @@ async def sleepHelper(message):
 async def complimenter(message):
     response = random.choice(dictionary.compliments)
     await message.channel.send(response)
+
+async def jesseHype(message):
+    uid = '<@745738275968516176>'
+    response = (":regional_indicator_w: :regional_indicator_e:   :regional_indicator_l: :regional_indicator_o: :regional_indicator_v: :regional_indicator_e:   :regional_indicator_j: :regional_indicator_e: :regional_indicator_s: :regional_indicator_s: :regional_indicator_e: \n Hey "+ uid + ", we wanna remind you that we love you! \n Here have some love from the fan club! \n :partying_face: :heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart: :blue_heart: :green_heart: :yellow_heart: :orange_heart: :heart: :partying_face:")
+    await message.channel.send(response)
+
 
 async def searchAnswer(message,msg,app_id,client):
     answer = search_internet(msg.content,app_id)
