@@ -8,6 +8,7 @@ import wikipedia as wp
 import wolframalpha as wa
 
 import discordcommands
+import dictionary
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -46,18 +47,8 @@ async def on_message(message):
         await message.channel.send('Shutting down')
         await client.logout()
 
-
-    brooklyn_99_quotes = [
-        'I\'m the human form of the 💯 emoji.',
-        'Bingpot!',
-        (
-            'Cool. Cool cool cool cool cool cool cool, '
-            'no doubt no doubt no doubt no doubt.'
-        ),
-    ]
-
     if message.content == '99!':
-        response = random.choice(brooklyn_99_quotes)
+        response = random.choice(dictionary.brooklyn_99_quotes)
         await message.channel.send(response)
 
 def check(author):

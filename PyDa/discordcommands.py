@@ -1,9 +1,26 @@
 import wikipedia as wp
 import wolframalpha as wa
 
+import dictionary
+import random
+
+
 def connect_wa(app_id):
     client = wa.Client(app_id)
     return client
+
+async def searchMethod(msg,message,app_id,client):
+    if msg.content == "How are you":
+        return wellbeing(message)
+
+    if msg.content.lower().count("search") >= 1:
+        return searchAnswer(message,msg,app_id,client)
+
+    if msg.content.lower().count("sleep") >= 1:
+        return sleepHelper(msg)
+
+    if msg.content.lower().count("hype") >= 1:
+        return complimenter(msg)
 
 
 async def callingCommand(message,client,app_id):
@@ -27,6 +44,7 @@ async def callingCommand(message,client,app_id):
                 method = await searchMethod(msg,message,app_id,client)
                 await method
 
+
             except:
                 await message.remove_reaction('👍',client.user)
 
@@ -34,13 +52,13 @@ async def wellbeing(message):
     response = 'Well I can respond, thats something'
     await message.channel.send(response)
 
-async def searchMethod(msg,message,app_id,client):
-    if msg.content == "How are you":
-        return wellbeing(message)
+async def sleepHelper(message):
+    response = (random.choice(dictionary.sleep_encouragements) % message.mentions[0].mention)
+    await message.channel.send(response)
 
-    if msg.content.lower().count("search") >= 1:
-        return searchAnswer(message,msg,app_id,client)
-
+async def complimenter(message):
+    response = random.choice(dictionary.compliments)
+    await message.channel.send(response)
 
 async def searchAnswer(message,msg,app_id,client):
     answer = search_internet(msg.content,app_id)
