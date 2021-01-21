@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import wikipedia as wp
 import wolframalpha as wa
 
-import discordcommands.py
+import discordcommands
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
