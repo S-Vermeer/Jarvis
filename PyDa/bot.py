@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import wikipedia as wp
 import wolframalpha as wa
 
-import discordcommands
+import discordcommands.py
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -45,6 +45,7 @@ async def on_message(message):
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
         await client.logout()
+
 
     brooklyn_99_quotes = [
         'I\'m the human form of the 💯 emoji.',
