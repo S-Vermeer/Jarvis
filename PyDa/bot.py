@@ -29,7 +29,7 @@ def connect_wa():
 @client.event
 async def on_ready():
     guild = discord.utils.get(client.guilds, name=GUILD)
-    logging.info(
+    logging.warning(
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
