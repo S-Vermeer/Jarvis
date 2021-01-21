@@ -16,7 +16,8 @@ after_success:
   - ./send.sh success $WEBHOOK_URL
   - docker build -t phillip .
   - docker tag phillip:latest skylervermeer/phillip:latest
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; docker push skylervermeer/phillip:latest
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push skylervermeer/phillip:latest
 
 after_failure:
   - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
