@@ -1,3 +1,5 @@
+import logging
+
 import wikipedia as wp
 import wolframalpha as wa
 
@@ -20,8 +22,8 @@ async def searchMethod(msg,message,app_id,client):
         return sleepHelper(msg)
 
     if msg.content.lower().count("hype") >= 1:
-        return complimenter(msg,client)
-    
+        return complimenter(msg)
+
     if msg.content.lower().count("jesse"):
         return jesseHype(msg)
 
@@ -59,7 +61,11 @@ async def sleepHelper(message):
     await message.channel.send(response)
 
 async def complimenter(message):
+    print("test")
+    print(message.mentions[0].nick)
+    print("check")
     response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
+    print(response)
     await message.channel.send(response)
 
 async def jesseHype(message):
