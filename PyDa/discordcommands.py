@@ -61,11 +61,7 @@ async def sleepHelper(message):
     await message.channel.send(response)
 
 async def complimenter(message):
-    print("test")
-    print(message.mentions[0].nick)
-    print("check")
     response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
-    print(response)
     await message.channel.send(response)
 
 async def jesseHype(message):
