@@ -10,7 +10,7 @@ def connect_wa(app_id):
     return client
 
 async def searchMethod(msg,message,app_id,client):
-    if msg.content == "How are you":
+    if msg.content.lower() == "how are you":
         return wellbeing(message)
 
     if msg.content.lower().count("search") >= 1:
@@ -27,8 +27,7 @@ async def searchMethod(msg,message,app_id,client):
 
 
 async def callingCommand(message,client,app_id):
-    phillip_names = ["whaddup phillip", "my son", "yo phillip", "my boy phillip", "hey phillip", "yo philly boy", "phillip", "p.h.i.l.l.i.p.", "p.h.i.l.l.i.p"]
-    for name in phillip_names:
+    for name in dictionary.phillip_names:
         if message.content.lower() == name:
             response = 'At your service'
             await message.channel.send(response)
@@ -59,7 +58,7 @@ async def sleepHelper(message):
     response = (random.choice(dictionary.sleep_encouragements) % message.mentions[0].mention)
     await message.channel.send(response)
 
-async def complimenter(message,client):
+async def complimenter(message):
     response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
     await message.channel.send(response)
 
