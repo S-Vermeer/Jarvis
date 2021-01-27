@@ -13,15 +13,31 @@ import wolframalpha as wa
 import discordcommands
 import dictionary
 
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
-app_id = os.getenv('APP_ID')
+import json
+import pipes
+import sys
+
+
 intents = discord.Intents.default()
 intents.members = True
 intents.reactions = True
 
 client = discord.Client(intents=intents)
+
+TOKEN = ""
+GUILD = ""
+app_id = ""
+
+def get_env_var():
+    load_dotenv()
+    TOKEN = os.getenv('DISCORD_TOKEN')
+    GUILD = os.getenv('DISCORD_GUILD')
+    app_id = os.getenv('APP_ID')
+
+    return TOKEN,GUILD,app_id
+
+TOKEN,GUILD,app_id = get_env_var()
+print(TOKEN)
 
 def connect_wa():
     client = wa.Client(app_id)
@@ -34,6 +50,8 @@ async def on_ready():
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
+    with open('credentials/client_secret.json') as json_file:
+        logging.warning(json.load(json_file))
 
     members = '\n - '.join([member.name for member in guild.members])
     print(len(guild.members))
@@ -110,5 +128,6 @@ def search_internet(inputQuery, message):
 
     except: # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
         return ["No results"]
+
 
 client.run(TOKEN)
