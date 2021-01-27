@@ -19,7 +19,7 @@ from pydrive.drive import GoogleDrive
 
 gauth = GoogleAuth()
 gauth.LocalWebserverAuth()
-
+logging.warning("passed test")
 drive = GoogleDrive(gauth)
 
 # Create httplib.Http() object.
