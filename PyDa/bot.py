@@ -17,20 +17,20 @@ import json
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-gauth = GoogleAuth()
-gauth.LocalWebserverAuth()
-logging.warning("passed test")
-drive = GoogleDrive(gauth)
+#gauth = GoogleAuth()
+#gauth.LocalWebserverAuth()
+#logging.warning("passed test")
+#drive = GoogleDrive(gauth)
 
 # Create httplib.Http() object.
-http = drive.auth.Get_Http_Object()
+#http = drive.auth.Get_Http_Object()
 
 # Create file object to upload.
-file_obj = drive.CreateFile()
-file_obj['title'] = "file name"
+#file_obj = drive.CreateFile()
+#file_obj['title'] = "file name"
 
 # Upload the file and pass the http object into the call to Upload.
-file_obj.Upload(param={"http": http})
+#file_obj.Upload(param={"http": http})
 
 
 intents = discord.Intents.default()
