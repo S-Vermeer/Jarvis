@@ -3,3 +3,4 @@ wikipedia
 SpeechRecognition
 discord.py
 python-dotenv
+PyDrive
