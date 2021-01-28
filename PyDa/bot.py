@@ -2,6 +2,7 @@ import os
 import random
 
 import logging
+import webbrowser
 
 import discord
 from dotenv import load_dotenv
@@ -17,21 +18,24 @@ import json
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
+
 def connectToGoogleDrive():
     #Change file path for settings file (hidden in github)
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
-    gauth.LocalWebserverAuth(host_name="phillip.skylervermeer.nl",port_numbers=[8181])
     auth_url = gauth.GetAuthUrl()
+    auth_url = auth_url.replace("http%3A%2F%2Flocalhost","https%3A%2F%2Fphillip.skylervermeer.nl")
     logging.warning(auth_url)
+    webbrowser.open(auth_url)
+    code = input("Please input redirect url")
+    gauth.Auth(code)
+
     logging.warning("Authorisation complete")
     drive = GoogleDrive(gauth)
 
     # Create httplib.Http() object.
     http = drive.auth.Get_Http_Object()
     return drive,http
-
-drive,http = connectToGoogleDrive()
 
 intents = discord.Intents.default()
 intents.members = True
@@ -60,6 +64,8 @@ def connect_wa():
 
 @client.event
 async def on_ready():
+    drive,http = await connectToGoogleDrive()
+
     guild = discord.utils.get(client.guilds, name=GUILD)
     logging.warning(
         f'{client.user} is connected to the following guild:\n'
