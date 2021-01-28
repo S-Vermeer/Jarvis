@@ -20,9 +20,8 @@ from pydrive.drive import GoogleDrive
 def connectToGoogleDrive():
     #Change file path for settings file (hidden in github)
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
-    GoogleAuth.CLIENT_CONFIGS_LIST['redirect_uri'] = "https://phillip.skylervermeer.nl"
     gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
+    gauth.LocalWebserverAuth(host_name="phillip.skylervermeer.nl",port_numbers=[8181])
     auth_url = gauth.GetAuthUrl()
     logging.warning(auth_url)
     logging.warning("Authorisation complete")
