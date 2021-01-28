@@ -22,6 +22,8 @@ def connectToGoogleDrive():
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
+    auth_url = gauth.GetAuthUrl()
+    logging.warning(auth_url)
     logging.warning("Authorisation complete")
     drive = GoogleDrive(gauth)
 
