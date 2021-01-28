@@ -17,14 +17,19 @@ import json
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-gauth = GoogleAuth()
-gauth.LocalWebserverAuth()
-logging.warning("passed test")
-drive = GoogleDrive(gauth)
+def connectToGoogleDrive():
+    #Change file path for settings file (hidden in github)
+    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
+    gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
+    logging.warning("Authorisation complete")
+    drive = GoogleDrive(gauth)
 
-# Create httplib.Http() object.
-http = drive.auth.Get_Http_Object()
+    # Create httplib.Http() object.
+    http = drive.auth.Get_Http_Object()
+    return drive,http
 
+drive,http = connectToGoogleDrive()
 
 intents = discord.Intents.default()
 intents.members = True
