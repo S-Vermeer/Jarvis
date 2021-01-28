@@ -24,6 +24,7 @@ def connectToGoogleDrive():
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
     auth_url = gauth.GetAuthUrl()
+    logging.warning(auth_url)
     auth_url = auth_url.replace("http%3A%2F%2Flocalhost","https%3A%2F%2Fphillip.skylervermeer.nl")
     logging.warning(auth_url)
     webbrowser.open(auth_url)
