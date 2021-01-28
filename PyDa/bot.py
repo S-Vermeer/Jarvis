@@ -19,17 +19,22 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
 
-def connectToGoogleDrive():
+async def connectToGoogleDrive(guild):
     #Change file path for settings file (hidden in github)
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
     auth_url = gauth.GetAuthUrl()
     logging.warning(auth_url)
-    # auth_url = auth_url.replace("https%3A%2F%2Fphillip.skylervermeer.nl","https%3A%2F%2Fphillip.skylervermeer.nl%3A8080")
+    #https://phillip.skylervermeer.nl:8080/?code=4/0AY0e-g5nVZh57PAN1fbCGH58h9yahXZ2R--AOm5wNnt5BtejJgS6qNj--7OmMZY_or2yUw&scope=https://www.googleapis.com/auth/drive.install
     logging.warning(auth_url)
-    webbrowser.open(auth_url)
-    code = input("Please input redirect url")
-    gauth.Auth(code)
+#    webbrowser.open(auth_url)
+    uid = 245989473408647171
+
+    skyler = guild.get_member(uid)
+    await skyler.create_dm()
+    await skyler.dm_channel.send(auth_url)
+    msg = await client.wait_for('message', check=check(skyler), timeout=60)
+    gauth.Auth(msg.content)
 
     logging.warning("Authorisation complete")
     drive = GoogleDrive(gauth)
@@ -37,6 +42,7 @@ def connectToGoogleDrive():
     # Create httplib.Http() object.
     http = drive.auth.Get_Http_Object()
     return drive,http
+
 
 intents = discord.Intents.default()
 intents.members = True
@@ -65,7 +71,6 @@ def connect_wa():
 
 @client.event
 async def on_ready():
-    drive,http = await connectToGoogleDrive()
 
     guild = discord.utils.get(client.guilds, name=GUILD)
     logging.warning(
@@ -78,6 +83,13 @@ async def on_ready():
     members = '\n - '.join([member.name for member in guild.members])
     print(len(guild.members))
 #    print(f'Guild Members:\n - {members}')
+
+    drive,http = await connectToGoogleDrive(guild)
+    # Create GoogleDriveFile instance with title 'Hello.txt'.
+    file1 = drive.CreateFile({'title': 'Hello.txt'})
+    file1.Upload(param={"http": http}) # Upload the file.
+    print('title: %s, id: %s' % (file1['title'], file1['id']))
+    # title: Hello.txt, id: {{FILE_ID}}
 
 @client.event
 async def on_message(message):
