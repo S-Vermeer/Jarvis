@@ -25,7 +25,7 @@ def connectToGoogleDrive():
     gauth = GoogleAuth()
     auth_url = gauth.GetAuthUrl()
     logging.warning(auth_url)
-    auth_url = auth_url.replace("http%3A%2F%2Flocalhost","https%3A%2F%2Fphillip.skylervermeer.nl")
+    auth_url = auth_url.replace("https%3A%2F%2Fphillip.skylervermeer.nl","https%3A%2F%2Fphillip.skylervermeer.nl3A8080%2F")
     logging.warning(auth_url)
     webbrowser.open(auth_url)
     code = input("Please input redirect url")
