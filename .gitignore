@@ -129,3 +129,5 @@ dmypy.json
 .pyre/
 
 PyDa/credentials/
+
+PyDa/client_secrets.json

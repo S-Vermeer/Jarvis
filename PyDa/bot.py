@@ -17,20 +17,13 @@ import json
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-#gauth = GoogleAuth()
-#gauth.LocalWebserverAuth()
-#logging.warning("passed test")
-#drive = GoogleDrive(gauth)
+gauth = GoogleAuth()
+gauth.LocalWebserverAuth()
+logging.warning("passed test")
+drive = GoogleDrive(gauth)
 
 # Create httplib.Http() object.
-#http = drive.auth.Get_Http_Object()
-
-# Create file object to upload.
-#file_obj = drive.CreateFile()
-#file_obj['title'] = "file name"
-
-# Upload the file and pass the http object into the call to Upload.
-#file_obj.Upload(param={"http": http})
+http = drive.auth.Get_Http_Object()
 
 
 intents = discord.Intents.default()
@@ -65,7 +58,7 @@ async def on_ready():
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
-    with open('credentials/client_secret.json') as json_file:
+    with open('credentials/client_secrets.json') as json_file:
         logging.warning(json.load(json_file))
 
     members = '\n - '.join([member.name for member in guild.members])
