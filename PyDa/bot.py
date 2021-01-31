@@ -2,13 +2,9 @@ import os
 import random
 
 import logging
-import webbrowser
 
 import discord
 from dotenv import load_dotenv
-
-import wikipedia as wp
-import wolframalpha as wa
 
 import discordcommands
 import dictionary
@@ -18,25 +14,34 @@ import json
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-
 async def connectToGoogleDrive(guild):
     #Change file path for settings file (hidden in github)
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
-    auth_url = gauth.GetAuthUrl()
-    logging.warning(auth_url)
-    #https://phillip.skylervermeer.nl:8080/?code=4/0AY0e-g5nVZh57PAN1fbCGH58h9yahXZ2R--AOm5wNnt5BtejJgS6qNj--7OmMZY_or2yUw&scope=https://www.googleapis.com/auth/drive.install
-    logging.warning(auth_url)
-#    webbrowser.open(auth_url)
-    uid = 245989473408647171
 
-    skyler = guild.get_member(uid)
-    await skyler.create_dm()
-    await skyler.dm_channel.send(auth_url)
-    msg = await client.wait_for('message', check=check(skyler), timeout=60)
-    gauth.Auth(msg.content)
+    gauth.LoadCredentialsFile("credentials/mycreds.txt")
+    if gauth.credentials is None:
+        #Get the url that the user must use to give access to google drive
+        auth_url = gauth.GetAuthUrl()
 
-    logging.warning("Authorisation complete")
+        uid = 245989473408647171
+
+        skyler = guild.get_member(uid)
+        msg = await discordcommands.dm_member_wait_for_response(skyler,auth_url,client)
+        gauth.Auth(msg.content)
+
+        logging.warning("Authorisation complete")
+    elif gauth.access_token_expired:
+        # Refresh them if expired
+        gauth.Refresh()
+        logging.warning("refresh")
+    else:
+        # Initialize the saved creds
+        gauth.Authorize()
+        logging.warning("used saved creds")
+    # Save the current credentials to a file
+    gauth.SaveCredentialsFile("credentials/mycreds.txt")
+
     drive = GoogleDrive(gauth)
 
     # Create httplib.Http() object.
@@ -53,6 +58,9 @@ client = discord.Client(intents=intents)
 TOKEN = ""
 GUILD = ""
 app_id = ""
+drive = ""
+http = ""
+
 
 def get_env_var():
     load_dotenv()
@@ -64,10 +72,6 @@ def get_env_var():
 
 TOKEN,GUILD,app_id = get_env_var()
 print(TOKEN)
-
-def connect_wa():
-    client = wa.Client(app_id)
-    return client
 
 @client.event
 async def on_ready():
@@ -85,11 +89,6 @@ async def on_ready():
 #    print(f'Guild Members:\n - {members}')
 
     drive,http = await connectToGoogleDrive(guild)
-    # Create GoogleDriveFile instance with title 'Hello.txt'.
-    file1 = drive.CreateFile({'title': 'Hello.txt'})
-    file1.Upload(param={"http": http}) # Upload the file.
-    print('title: %s, id: %s' % (file1['title'], file1['id']))
-    # title: Hello.txt, id: {{FILE_ID}}
 
 @client.event
 async def on_message(message):
@@ -123,7 +122,7 @@ async def on_message(message):
             response = response + function[0] + "```" + function[1] + "```" + "\n"
         await message.channel.send(response)
 
-def check(author):
+def check(author): #check whether the message was sent by the requester
     def inner_check(message):
         if message.author != author:
             return False
@@ -131,37 +130,6 @@ def check(author):
             return True
 
     return inner_check
-
-def search_internet(inputQuery, message):
-    client = connect_wa()
-    try: # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
-        res = client.query(inputQuery)
-        wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
-
-        wiki_res = wp.summary(inputQuery,sentences=2)
-        answerWA = "Wolfram Result: " + wolfram_res
-        answerWP = "Wikipedia Result: " + wiki_res
-        answer = [answerWA,answerWP]
-        return answer
-
-    except (wp.exceptions.DisambiguationError,wp.exceptions.PageError,wp.exceptions.WikipediaException): # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
-        try:
-            res = client.query(inputQuery)
-            wolfram_res = next(res.results).text # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
-            return [wolfram_res]
-
-        except (StopIteration,AttributeError):
-            try:
-                wiki_res = wp.summary(inputQuery,sentences=2)
-                return wiki_res
-            except:
-                return ["No results"]
-
-    except (StopIteration,AttributeError): # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
-        return ["No results"]
-
-    except: # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        return ["No results"]
 
 
 client.run(TOKEN)

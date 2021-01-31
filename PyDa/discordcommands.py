@@ -6,6 +6,17 @@ import wolframalpha as wa
 import dictionary
 import random
 
+async def dm_member_wait_for_response(member,message,client):
+    await member.create_dm()
+    await member.dm_channel.send(message)
+    msg = await client.wait_for('message', check=check(member), timeout=60)
+
+    return msg
+
+async def dm_member(member, message):
+    await member.create_dm()
+    await member.dm_channel.send(message)
+
 
 def connect_wa(app_id):
     client = wa.Client(app_id)
@@ -112,3 +123,15 @@ def search_internet(inputQuery, app_id):
 
     except: # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
         return ["No results"]
+
+
+
+
+def check(author): #check whether the message was sent by the requester
+    def inner_check(message):
+        if message.author != author or message.channel != author.dm_channel:
+            return False
+        else:
+            return True
+
+    return inner_check
