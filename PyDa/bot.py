@@ -11,8 +11,8 @@ import dictionary
 
 import json
 
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
+from pydrive2.auth import GoogleAuth
+from pydrive2.drive import GoogleDrive
 
 async def connectToGoogleDrive(guild):
     #Change file path for settings file (hidden in github)
@@ -58,9 +58,6 @@ client = discord.Client(intents=intents)
 TOKEN = ""
 GUILD = ""
 app_id = ""
-drive = ""
-http = ""
-
 
 def get_env_var():
     load_dotenv()
@@ -87,14 +84,16 @@ async def on_ready():
     members = '\n - '.join([member.name for member in guild.members])
     print(len(guild.members))
 #    print(f'Guild Members:\n - {members}')
-
+    global drive,http
     drive,http = await connectToGoogleDrive(guild)
+    print("done")
+
 
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
-    await discordcommands.callingCommand(message,client,app_id)
+    await discordcommands.callingCommand(message,client,app_id,drive,http)
 
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
