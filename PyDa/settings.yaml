@@ -8,5 +8,4 @@ get_refresh_token: True
 prompt: consent
 
 oauth_scope:
-  - https://www.googleapis.com/auth/drive.file
-  - https://www.googleapis.com/auth/drive.install
+  - https://www.googleapis.com/auth/drive

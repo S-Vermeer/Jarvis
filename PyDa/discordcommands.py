@@ -41,9 +41,7 @@ async def searchMethod(msg, message, app_id, client):
     if msg.content.lower().count("jesse") >= 1:
         return jesseHype(msg)
 
-    await message.channel.send("I have reached the loop")
     if msg.content.lower().count("drive") >= 1:
-        await message.channel.send("I am inside the loop")
         return driveCommand(msg)
 
 
@@ -76,7 +74,6 @@ async def callingCommand(message, client, app_id, currentdrive, currenthttp):
 
             except Exception as e:
                 await message.remove_reaction('👍', client.user)
-                await message.channel.send("exception triggered")
                 logging.warning(str(e))
 
 
@@ -117,7 +114,21 @@ async def searchAnswer(message, msg, app_id, client):
 
 
 async def driveCommand(message):
-    await message.channel.send("test")
+    if message.content.lower().count("inventory") >= 1:
+
+        # View all folders and file in your Google Drive
+        fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+        flag = False
+        for file in fileList:
+            if(file['mimeType'] != "application/vnd.google-apps.folder"):
+                await message.channel.send('Title: %s, ID: %s, mimeType: %s \n\n' % (file['title'], file['id'], file['mimeType']))
+                flag = True
+    if(not flag):
+        message.channel.send('Sorry! no file found...')
+            # # Get the folder ID that you want
+            # if(file['title'] == "To Share"):
+            #     fileID = file['id']
+
     if message.content.lower().count("create") >= 1:
         # createFile(title, content,drive)
         return await message.channel.send("create method triggered")
