@@ -24,7 +24,7 @@ async def connectToGoogleDrive(guild):
         #Get the url that the user must use to give access to google drive
         auth_url = gauth.GetAuthUrl()
 
-        uid = 245989473408647171
+        uid = 245989473408647171 #Skyler (Developer) User ID so the message is DMed to them
 
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler,auth_url,client)
@@ -69,6 +69,7 @@ def get_env_var():
 
 TOKEN,GUILD,app_id = get_env_var()
 print(TOKEN)
+print(GUILD)
 
 @client.event
 async def on_ready():

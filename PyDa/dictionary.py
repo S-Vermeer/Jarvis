@@ -47,3 +47,9 @@ sleep_encouragements = [
     "if your name is %s you need to sleep",
     "lets all point to the sleep deprived person *points at %s*"
 ]
+
+good_morning = [
+    "gm1",
+    "gm2",
+    "gm3"
+]

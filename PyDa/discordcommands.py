@@ -9,7 +9,7 @@ import random
 
 async def dm_member_wait_for_response(member, message, client):
     await member.create_dm()
-    await member.dm_channel.send(message)
+    await member.dm_cseahannel.send(message)
     msg = await client.wait_for('message', check=check(member), timeout=60)
 
     return msg
@@ -42,7 +42,7 @@ async def searchMethod(msg, message, app_id, client):
         return jesseHype(msg)
 
     if msg.content.lower().count("drive") >= 1:
-        return driveCommand(msg)
+        return driveCommand(msg, client, app_id)
 
 
 async def callingCommand(message, client, app_id, currentdrive, currenthttp):
@@ -113,27 +113,24 @@ async def searchAnswer(message, msg, app_id, client):
                 await message.channel.send(answer[1])
 
 
-async def driveCommand(message):
+async def driveCommand(message,client, app_id):
     if message.content.lower().count("inventory") >= 1:
 
         # View all folders and file in your Google Drive
         fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
         flag = False
         for file in fileList:
-            if(file['mimeType'] != "application/vnd.google-apps.folder"):
-                await message.channel.send('Title: %s, ID: %s, mimeType: %s \n\n' % (file['title'], file['id'], file['mimeType']))
-                flag = True
+            await message.channel.send('Title: %s, ID: %s, mimeType: %s \n\n' % (file['title'], file['id'], file['mimeType']))
+            flag = True
     if(not flag):
         message.channel.send('Sorry! no file found...')
-            # # Get the folder ID that you want
-            # if(file['title'] == "To Share"):
-            #     fileID = file['id']
 
     if message.content.lower().count("create") >= 1:
         # createFile(title, content,drive)
         return await message.channel.send("create method triggered")
 
     if message.content.lower().count("change name") >= 1:
+        file = require_response(message, client, app_id)
         # changeTitle(file,newname)
         return await message.channel.send("change title method triggered")
 
@@ -213,3 +210,26 @@ def createFileWithImageContent(drive, content):
     file.SetContentFile(content)
     file.Upload()
     print('Created file %s with mimeType %s' % (file['title'], file['mimeType']))
+
+async def require_response(message, client, app_id):
+    try:
+        await message.add_reaction('👍')
+
+        def check(author):
+
+            def inner_check(message):
+                if message.author != author:
+                    return False
+                else:
+                    return True
+
+            return inner_check
+
+        msg = await client.wait_for('message', check=check(message.author), timeout=15)
+        method = await searchMethod(msg, message, app_id, client)
+        await method
+
+
+    except Exception as e:
+        await message.remove_reaction('👍', client.user)
+        logging.warning(str(e))
