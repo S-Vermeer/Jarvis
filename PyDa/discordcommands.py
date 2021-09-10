@@ -9,7 +9,7 @@ import random
 
 async def dm_member_wait_for_response(member, message, client):
     await member.create_dm()
-    await member.dm_cseahannel.send(message)
+    await member.dm_channel.send(message)
     msg = await client.wait_for('message', check=check(member), timeout=60)
 
     return msg
@@ -225,7 +225,7 @@ async def require_response(message, client, app_id):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=check(message.author), timeout=15)
+        msg = await client.wait_for('message', check=check(mesdsage.author), timeout=15)
         method = await searchMethod(msg, message, app_id, client)
         await method
 
