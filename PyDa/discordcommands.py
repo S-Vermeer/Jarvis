@@ -225,7 +225,7 @@ async def require_response(message, client, app_id):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=check(mesdsage.author), timeout=15)
+        msg = await client.wait_for('message', check=check(message.author), timeout=15)
         method = await searchMethod(msg, message, app_id, client)
         await method
 
