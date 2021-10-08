@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+PyDa/credentials/
+
+PyDa/client_secrets.json
