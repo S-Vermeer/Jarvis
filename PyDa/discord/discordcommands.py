@@ -3,8 +3,9 @@ import logging
 import wikipedia as wp
 import wolframalpha as wa
 
-import dictionary
 import random
+
+import PyDa.discord.assets.dictionary as dictionary
 
 
 async def dm_member_wait_for_response(member, message, client):

@@ -7,7 +7,7 @@ import discord
 from dotenv import load_dotenv
 
 import discordcommands
-import dictionary
+import PyDa.discord.assets.dictionary as dictionary
 
 import json
 
@@ -79,6 +79,7 @@ async def on_ready():
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
+    logging.warning(os.getcwd())
     with open('credentials/client_secrets.json') as json_file:
         logging.warning(json.load(json_file))
 
