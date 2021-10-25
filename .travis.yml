@@ -6,7 +6,7 @@ install:
   - pip install -r requirements.txt
 # command to run tests
 before_install:
-  - cd PyDa
+  - cd PyDa/discord
 script:
   - pytest
 
@@ -27,3 +27,8 @@ after_failure:
 
 services:
   - docker
+
+addons:
+  sonarcloud:
+    token:
+      secure: "783e4cc34e0aaa10abaf4e19821833752c4f2d44"
