@@ -146,6 +146,7 @@ async def driveCommand(message,client, app_id):
 
 def search_internet(inputQuery, app_id):
     client = connect_wa(app_id)
+    no_results = "No results"
     try:  # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
         res = client.query(inputQuery)
         wolfram_res = next(res.results).text  # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
@@ -167,16 +168,18 @@ def search_internet(inputQuery, app_id):
             try:
                 wiki_res = wp.summary(inputQuery, sentences=2)
                 return wiki_res
-            except:
-                return ["No results"]
+            except BaseException as e:
+                raise e
+                return [no_results]
 
     except (
             StopIteration,
             AttributeError):  # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
-        return ["No results"]
+        return [no_results]
 
-    except:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        return ["No results"]
+    except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
+        raise e
+        return [no_results]
 
 
 def check(author):  # check whether the message was sent by the requester
