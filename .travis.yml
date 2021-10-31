@@ -37,4 +37,4 @@ addons:
   sonarcloud:
     organization: "s-vermeer"
     token:
-      secure: "CbPpQ9JVbHqmm+uz7ZK3EUFayF5CW8De1Va6l16D9gGj0ZeoHCRVYm33L8WTh/8yLg5hZDHztKjYjUpfqdDwP+HpzqkhxbSM4qFZmk7zV4gCG9q/nxTh5X5pEFytCUXvcprpmnA3GEuPOCrs/EikXhf/taL+6up92Zke8J3FWlUipBo1OOpaEgxFeFYilT8jk3fGpPBNOBELJFrVdzVl5niYDeOOQ+HrGt56YAUEhrxI22rJJKZj7eOSJrOkoTjYVJzrBXdH414k01laD/2sMe20kBA1LH1oJY/nbrV97mpOzQmnVjwUi00/Av65h2ZvRmI3tmdL9YOdlQlQ24USSspJ/S/SVH1p+aW1wdQHaozHEg8dCfGdt48FIFqqx7BQ3kxvO6rHZi3grW/mBv7pTw95SXkDy9jS7P6lFUnHBJg2ZzYGaPhkDAHC/7UScWlQHrZtZFjba0RYSO99AflzZ19RZ6wpPAS+vONnIJ0Ax8TMt/0cvJ4tmImXrUc+B/CA71XEphuqHmSNqj3M792bkoabvdEWSEsaXS31eqfNGctwNVGsBCCl33l5xmOnQwAESyIW7D4xgJKPyyA6MeCQElUxNxfjCGppf1jzKAu2n3NH0vxIjwbruwFDdIfGtn+9qljUMJMk3IrL/+jIesPay5hhx6N45DzY2a29s/2uUQw="
+      secure: SONAR_TOKEN
