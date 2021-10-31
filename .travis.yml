@@ -39,5 +39,4 @@ services:
 addons:
   sonarcloud:
     organization: "s-vermeer"
-    token:
-      secure: $SONAR_TOKEN
+    token: $SONAR_TOKEN
