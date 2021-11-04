@@ -4,10 +4,11 @@ import random
 import logging
 
 import discord
+
 from dotenv import load_dotenv
 
 import discordcommands
-import PyDa.discord.assets.dictionary as dictionary
+import assets.dictionary as dictionary
 
 import json
 

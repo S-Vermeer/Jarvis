@@ -5,7 +5,7 @@ import wolframalpha as wa
 
 import random
 
-import PyDa.discord.assets.dictionary as dictionary
+import assets.dictionary as dictionary
 
 
 async def dm_member_wait_for_response(member, message, client):
