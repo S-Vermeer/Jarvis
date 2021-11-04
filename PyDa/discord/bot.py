@@ -34,7 +34,8 @@ async def connectToGoogleDrive(guild):
         logging.warning("Authorisation complete")
     elif gauth.access_token_expired:
         # Refresh them if expired
-        gauth.Refresh()
+        open('credentials/mycreds.txt', 'w').close()        # gauth.Refresh()
+        gauth.Refresh();
         logging.warning("refresh")
     else:
         # Initialize the saved creds
