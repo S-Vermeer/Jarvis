@@ -29,7 +29,7 @@ def connect_wa(app_id):
 
 
 async def search_method(msg, message, app_id, client):
-    if msg.content.lower() == "how are you":
+    if msg.content.lower().count("how are you") >= 1:
         return wellbeing(message)
 
     if msg.content.lower().count("search") >= 1:
