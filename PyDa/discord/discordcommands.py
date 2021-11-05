@@ -170,7 +170,8 @@ def search_internet(input_query, app_id):
                 wiki_res = wp.summary(input_query, sentences=2)
                 return wiki_res
             except BaseException as e:
-                raise e
+                logging.exception('error while accessing the wiki summary' + e)
+                return no_results
 
     except (
             StopIteration,
@@ -178,7 +179,8 @@ def search_internet(input_query, app_id):
         return [no_results]
 
     except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        raise e
+        logging.exception('error while accessing the searches that couldn\'t be specified + e')
+        return no_results
 
 
 def check(author):  # check whether the message was sent by the requester

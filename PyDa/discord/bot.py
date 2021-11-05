@@ -98,31 +98,48 @@ async def on_message(message):
             return
         await discordcommands.calling_command(message, client, app_id, drive, http)
 
-        if message.content.lower() == 'stop':
-            await message.channel.send('Shutting down')
-            await client.logout()
+        stop(message)
+        name_list(message)
+        b99(message)
+        help_msg(message)
 
-        if message.content.lower() == 'names':
-            response = "Phillip responds to:\n"
-            for name in dictionary.phillip_names:
-                response = response + name + "\n"
-            await message.channel.send(response)
 
-        if message.content == '99!':
-            response = random.choice(dictionary.brooklyn_99_quotes)
-            await message.channel.send(response)
+def stop(message):
+    if message.content.lower() == 'stop':
+        await message.channel.send('Shutting down')
+        await client.logout()
 
-        if message.content.lower() == 'help':
-            response = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below.\nYou don't have to call my name for me to listen to the following functions: \n"
 
-            for function in dictionary.always_functions:
-                response = response + function[0] + "```" + function[1] + "```" + "\n"
+def name_list(message):
+    if message.content.lower() == 'names':
+        response = "Phillip responds to:\n"
+        for name in dictionary.phillip_names:
+            response = response + name + "\n"
+        await message.channel.send(response)
 
-            response = response + "\n If you call on me (using one of the names listed in 'names') I will start listening for more commands.\nI will be listening for the first message you sent after you call me for 15 seconds, if you do not respond before that time I'll remove the reaction under your calling message.\nThe commands I will be listening for are the following: \n"
 
-            for function in dictionary.on_call_functions:
-                response = response + function[0] + "```" + function[1] + "```" + "\n"
-            await message.channel.send(response)
+def b99(message):
+    if message.content == '99!':
+        response = random.choice(dictionary.brooklyn_99_quotes)
+        await message.channel.send(response)
+
+
+def help_msg(message):
+    if message.content.lower() == 'help':
+        response = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below.\nYou don't have to call my " \
+                   "name for me to listen to the following functions: \n "
+
+        for function in dictionary.always_functions:
+            response = response + function[0] + "```" + function[1] + "```" + "\n"
+
+        response = response + "\n If you call me (using one of the names listed in 'names') I will start listening " \
+                              "for more commands.\nI will be listening for the first message you sent after you call " \
+                              "me for 15 seconds, if you do not respond before that time I'll remove the reaction " \
+                              "under your calling message.\nThe commands I will be listening for are the following: \n "
+
+        for function in dictionary.on_call_functions:
+            response = response + function[0] + "```" + function[1] + "```" + "\n"
+        await message.channel.send(response)
 
 
 def check(author):  # check whether the message was sent by the requester
