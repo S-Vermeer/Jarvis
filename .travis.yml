@@ -3,7 +3,7 @@ python:
   - "3.9"
 
 before_install:
-  - cd PyDa/discord
+  - cd PyDa/discord_code
 
 # command to install dependencies
 install:

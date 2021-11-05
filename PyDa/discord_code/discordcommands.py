@@ -1,11 +1,13 @@
 import logging
 
+# import discord
 import wikipedia as wp
 import wolframalpha as wa
 
 import random
 
 import assets.dictionary as dictionary
+from discord.ext import tasks
 
 
 async def dm_member_wait_for_response(member, message, client):
@@ -98,7 +100,26 @@ async def complimenter(message):
 async def jesse_hype(message):
     uid = '<@745738275968516176>'
     response = (
-            ":regional_indicator_w: :regional_indicator_e:   :regional_indicator_l: :regional_indicator_o: :regional_indicator_v: :regional_indicator_e:   :regional_indicator_j: :regional_indicator_e: :regional_indicator_s: :regional_indicator_s: :regional_indicator_e: \n Hey " + uid + ", we wanna remind you that we love you! \n Here have some love from the fan club! \n :partying_face: :heart: :orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart: :blue_heart: :green_heart: :yellow_heart: :orange_heart: :heart: :partying_face:")
+            ":regional_indicator_w: :regional_indicator_e:   :regional_indicator_l: :regional_indicator_o: "
+            ":regional_indicator_v: :regional_indicator_e:   :regional_indicator_j: :regional_indicator_e: "
+            ":regional_indicator_s: :regional_indicator_s: :regional_indicator_e: \n Hey " + uid + ", we wanna remind "
+                                                                                                   "you that we love "
+                                                                                                   "you! \n Here have "
+                                                                                                   "some love from "
+                                                                                                   "the fan club! \n "
+                                                                                                   ":partying_face: "
+                                                                                                   ":heart: "
+                                                                                                   ":orange_heart: "
+                                                                                                   ":yellow_heart: "
+                                                                                                   ":green_heart: "
+                                                                                                   ":blue_heart: "
+                                                                                                   ":purple_heart: "
+                                                                                                   ":blue_heart: "
+                                                                                                   ":green_heart: "
+                                                                                                   ":yellow_heart: "
+                                                                                                   ":orange_heart: "
+                                                                                                   ":heart: "
+                                                                                                   ":partying_face:")
     await message.channel.send(response)
 
 
@@ -247,5 +268,17 @@ async def good_morning(guild):
     uid = 245989473408647171  # Skyler (Developer) User ID so the message is DMed to them
 
     skyler = guild.get_member(uid)
-    message = "good morning test"
-    await dm_member(skyler,message)
+    morning_message = "good morning test"
+    await called_every_five_min()
+    await dm_member(skyler, morning_message)
+
+
+@tasks.loop(seconds=10)
+async def called_every_five_min():
+    logging.warning("called")
+
+
+@called_every_five_min.before_loop
+async def before_printer(self):
+    logging.warning('waiting...')
+    await self.bot.wait_until_ready()

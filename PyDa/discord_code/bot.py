@@ -93,6 +93,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    if message.guild is None:
+        return
     if GUILD == message.guild.name:
         if message.author == client.user:
             return
