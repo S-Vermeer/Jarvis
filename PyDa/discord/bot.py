@@ -98,19 +98,19 @@ async def on_message(message):
             return
         await discordcommands.calling_command(message, client, app_id, drive, http)
 
-        stop(message)
-        name_list(message)
-        b99(message)
-        help_msg(message)
+        await stop(message)
+        await name_list(message)
+        await b99(message)
+        await help_msg(message)
 
 
-def stop(message):
+async def stop(message):
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
-        await client.logout()
+        await client.close()
 
 
-def name_list(message):
+async def name_list(message):
     if message.content.lower() == 'names':
         response = "Phillip responds to:\n"
         for name in dictionary.phillip_names:
@@ -118,13 +118,13 @@ def name_list(message):
         await message.channel.send(response)
 
 
-def b99(message):
+async def b99(message):
     if message.content == '99!':
         response = random.choice(dictionary.brooklyn_99_quotes)
         await message.channel.send(response)
 
 
-def help_msg(message):
+async def help_msg(message):
     if message.content.lower() == 'help':
         response = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below.\nYou don't have to call my " \
                    "name for me to listen to the following functions: \n "

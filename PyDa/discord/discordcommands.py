@@ -45,6 +45,9 @@ async def search_method(msg, message, app_id, client):
     if msg.content.lower().count("drive") >= 1:
         return drive_command(msg, client, app_id)
 
+    if msg.content.lower().count("morning") >= 1:
+        return good_morning(msg.guild)
+
 
 async def calling_command(message, client, app_id, currentdrive, currenthttp):
     global drive
@@ -238,3 +241,11 @@ async def require_response(message, client, app_id):
     except Exception as e:
         await message.remove_reaction('👍', client.user)
         logging.warning(str(e))
+
+
+async def good_morning(guild):
+    uid = 245989473408647171  # Skyler (Developer) User ID so the message is DMed to them
+
+    skyler = guild.get_member(uid)
+    message = "good morning test"
+    await dm_member(skyler,message)
