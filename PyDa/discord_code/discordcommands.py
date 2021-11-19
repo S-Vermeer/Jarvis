@@ -1,6 +1,9 @@
 import logging
+import os
+import sched
 
-# import discord
+import discord
+import schedule
 import wikipedia as wp
 import wolframalpha as wa
 
@@ -27,6 +30,7 @@ def connect_wa(app_id):
     client = wa.Client(app_id)
     return client
 
+dis_client = None
 
 async def search_method(msg, message, app_id, client):
     if msg.content.lower().count("how are you") >= 1:
@@ -48,7 +52,10 @@ async def search_method(msg, message, app_id, client):
         return drive_command(msg, client, app_id)
 
     if msg.content.lower().count("morning") >= 1:
-        return good_morning(msg.guild)
+        global dis_client
+        dis_client = client
+        logging.warning("reached good_morning")
+        return good_morning()
 
 
 async def calling_command(message, client, app_id, currentdrive, currenthttp):
@@ -169,6 +176,7 @@ async def drive_command(message, client, app_id):
         return await message.channel.send("image add function triggered")
 
 
+
 def search_internet(input_query, app_id):
     client = connect_wa(app_id)
     no_results = "No results"
@@ -264,21 +272,42 @@ async def require_response(message, client, app_id):
         logging.warning(str(e))
 
 
-async def good_morning(guild):
+async def start_scheduler():
+    logging.warning("started")
+    await called_every_day.start()
+    logging.warning("cancelling")
+    return schedule.CancelJob
+
+from apscheduler.schedulers.blocking import BlockingScheduler
+
+
+async def good_morning():
+    logging.warning("do good morning")
+    scheduler = BlockingScheduler()
+    scheduler.add_job(start_scheduler, 'interval', hours=1)
+    scheduler.start()
+
+    # await called_every_day.start()
+
+
+def schedule_check():
+    logging.warning("check")
+
+
+intents = discord.Intents.default()
+intents.members = True
+intents.reactions = True
+
+
+@tasks.loop(hours=24.0)
+async def called_every_day():
+    logging.warning("reached2")
+    guild_name = os.getenv('DISCORD_GUILD')
+    guild = discord.utils.get(dis_client.guilds, name=guild_name)
     uid = 245989473408647171  # Skyler (Developer) User ID so the message is DMed to them
 
-    skyler = guild.get_member(uid)
+    member = guild.get_member(uid)
     morning_message = "good morning test"
-    await called_every_five_min()
-    await dm_member(skyler, morning_message)
 
-
-@tasks.loop(seconds=10)
-async def called_every_five_min():
-    logging.warning("called")
-
-
-@called_every_five_min.before_loop
-async def before_printer(self):
-    logging.warning('waiting...')
-    await self.bot.wait_until_ready()
+    dm = await member.create_dm()
+    await dm.send(morning_message)
