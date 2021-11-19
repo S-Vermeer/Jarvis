@@ -179,12 +179,8 @@ async def drive_command(message, client, app_id):
         title_msg = await get_question_response('Please specify the title for the document', message, client)
         content_msg = await get_question_response('Please upload the image(s)', title_msg,client)
         path = content_msg.attachments[0].url
-        logging.warning(path)
-        # content = requests.get(path).content
-        # logging.warning("update")
         create_image_file(title_msg.content,path)
-        logging.warning("created drive file")
-        return await message.channel.send("image add function triggered")
+        return await message.channel.send("The image was added to the drive")
 
 
 def search_internet(input_query, app_id):
@@ -260,29 +256,21 @@ def create_image_file(title, content):
     filename = title # Please set the filename on Google Drive.
     folder_id = 'root' # Please set the folder ID. The file is put to this folder.
 
-    logging.warning("variables set")
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
     metadata = {
         "name": filename,
         "parents": [folder_id]
     }
-    logging.warning(metadata)
-
-    logging.warning("variables set")
     files = {
         'data': ('metadata', json.dumps(metadata), 'application/json'),
         'file': io.BytesIO(requests.get(url).content)
     }
-
-    logging.warning("variables set")
     r = requests.post(
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         headers={"Authorization": "Bearer " + gauth.credentials.access_token},
         files=files
     )
-    logging.warning("variables set")
-    print(r.text)
 
 
 def change_title(file, newname):
