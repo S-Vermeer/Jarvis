@@ -1,6 +1,10 @@
+import io
+import json
 import logging
 
 # import discord
+import discord
+import requests
 import wikipedia as wp
 import wolframalpha as wa
 
@@ -8,6 +12,7 @@ import random
 
 import assets.dictionary as dictionary
 from discord.ext import tasks
+from pydrive.auth import GoogleAuth
 
 
 async def dm_member_wait_for_response(member, message, client):
@@ -137,35 +142,48 @@ async def search_answer(message, msg, app_id, client):
                 await message.channel.send(answer[1])
 
 
-async def drive_command(message, client, app_id):
-    flag = True
-    if message.content.lower().count("inventory") >= 1:
+async def get_question_response(question, message, client):
+    await message.channel.send(question)
+    return await wait_for_response_message_drive(message,client)
 
-        # View all folders and file in your Google Drive
-        file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-        flag = False
-        for file in file_list:
-            await message.channel.send(
-                'Title: %s, ID: %s, mimeType: %s \n\n' % (file['title'], file['id'], file['mimeType']))
-            flag = True
-    if not flag:
-        message.channel.send('Sorry! no file found...')
+
+async def select_file(message, client):
+    file_id = await get_question_response('Please specify the id of the document to change', message, client)
+    return drive.CreateFile({'id': file_id.content})
+
+
+async def drive_command(message, client, app_id):
+    if message.content.lower().count("inventory") >= 1:
+        await drive_inventory(message)
 
     if message.content.lower().count("create") >= 1:
-        # createFile(title, content,drive)
-        return await message.channel.send("create method triggered")
+        title_msg = await get_question_response('Please specify the title for the document', message, client)
+        content_msg = await get_question_response('Please specify the content for the document', title_msg,client)
+        create_file(title_msg.content, content_msg.content)
+        return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
 
     if message.content.lower().count("change name") >= 1:
-        file = require_response(message, client, app_id)
-        # changeTitle(file,newname)
-        return await message.channel.send("change title method triggered")
+        await drive_inventory(message)
+        file = await select_file(message, client)
+        title_msg = await get_question_response('Please specify the title for the document', message, client)
+        change_title(file,title_msg.content)
+        return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
-        # addToContent(file,content_to_add)
+        file = await select_file(message, client)
+        content_to_add = await get_question_response('Please specify the text you want to add to the document', message, client)
+        add_to_content(file,content_to_add.content)
         return await message.channel.send("add content method triggered")
 
     if message.content.lower().count("add image") >= 1:
-        # createFileWithImageContent(drive,content)
+        title_msg = await get_question_response('Please specify the title for the document', message, client)
+        content_msg = await get_question_response('Please upload the image(s)', title_msg,client)
+        path = content_msg.attachments[0].url
+        logging.warning(path)
+        # content = requests.get(path).content
+        # logging.warning("update")
+        create_image_file(title_msg.content,path)
+        logging.warning("created drive file")
         return await message.channel.send("image add function triggered")
 
 
@@ -194,7 +212,7 @@ def search_internet(input_query, app_id):
                 wiki_res = wp.summary(input_query, sentences=2)
                 return wiki_res
             except BaseException as e:
-                logging.exception('error while accessing the wiki summary' + e)
+                logging.exception('error while accessing the wiki summary: ' + str(e))
                 return no_results
 
     except (
@@ -217,28 +235,66 @@ def check(author):  # check whether the message was sent by the requester
     return inner_check
 
 
+async def drive_inventory(message):
+    # View all folders and file in your Google Drive
+    file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+    flag = False
+    list_msg = ""
+    for file in file_list:
+        list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
+        flag = True
+    if flag:
+        await message.channel.send(list_msg)
+    if not flag:
+        message.channel.send('Sorry! no file found...')
+
+
 def create_file(title, content):
     file = drive.CreateFile({'title': title})
     file.SetContentString(content)
     file.Upload()  # Files.insert()
 
 
+def create_image_file(title, content):
+    url = content # Please set the direct link of the image file.
+    filename = title # Please set the filename on Google Drive.
+    folder_id = 'root' # Please set the folder ID. The file is put to this folder.
+
+    logging.warning("variables set")
+    gauth = GoogleAuth()
+    gauth.LocalWebserverAuth()
+    metadata = {
+        "name": filename,
+        "parents": [folder_id]
+    }
+    logging.warning(metadata)
+
+    logging.warning("variables set")
+    files = {
+        'data': ('metadata', json.dumps(metadata), 'application/json'),
+        'file': io.BytesIO(requests.get(url).content)
+    }
+
+    logging.warning("variables set")
+    r = requests.post(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        headers={"Authorization": "Bearer " + gauth.credentials.access_token},
+        files=files
+    )
+    logging.warning("variables set")
+    print(r.text)
+
+
 def change_title(file, newname):
+    file.FetchMetadata(fields="title")
     file['title'] = newname  # Change title of the file
     file.Upload()  # Files.patch()
 
 
 def add_to_content(file, content_to_add):
     content = file.GetContentString()  # 'Hello'
-    file.SetContentString(content + " " + content_to_add)  # 'Hello World!'
+    file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
     file.Upload()  # Files.update()
-
-
-def create_file_with_image_content(content):
-    file = drive.CreateFile()
-    file.SetContentFile(content)
-    file.Upload()
-    print('Created file %s with mimeType %s' % (file['title'], file['mimeType']))
 
 
 async def require_response(message, client, app_id):
@@ -282,3 +338,26 @@ async def called_every_five_min():
 async def before_printer(self):
     logging.warning('waiting...')
     await self.bot.wait_until_ready()
+
+
+async def wait_for_response_message_drive(message, client):
+    try:
+        await message.add_reaction('👍')
+
+        def check_author(author):
+
+            def inner_check(message_to_check):
+                if message_to_check.author != author:
+                    logging.warning("author doesn't match")
+                    return False
+                else:
+                    return True
+
+            return inner_check
+
+        msg = await client.wait_for('message', check=check_author(message.author), timeout=15)
+        return msg
+
+    except Exception as e:
+        await message.remove_reaction('👍', client.user)
+        logging.warning(str(e))
