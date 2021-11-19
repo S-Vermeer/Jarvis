@@ -30,6 +30,7 @@ async def connect_to_google_drive(guild):
 
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
+        logging.warning(msg.content)
         gauth.Auth(msg.content)
 
         logging.warning("Authorisation complete")
