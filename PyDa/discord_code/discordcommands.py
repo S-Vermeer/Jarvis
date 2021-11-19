@@ -12,7 +12,7 @@ import random
 
 import assets.dictionary as dictionary
 from discord.ext import tasks
-from pydrive.auth import GoogleAuth
+from pydrive2.auth import GoogleAuth
 
 
 async def dm_member_wait_for_response(member, message, client):
