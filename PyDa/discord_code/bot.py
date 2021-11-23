@@ -32,8 +32,8 @@ async def connect_to_google_drive(guild):
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
         logging.warning(msg.content)
-        logging.warning(jwt.decode(msg.content))
-        gauth.Auth(jwt.decode(msg.content))
+        logging.warning(jwt.decode(msg.content,verify=False))
+        gauth.Auth(jwt.decode(msg.content,verify=False))
 
         logging.warning("Authorisation complete")
     elif gauth.access_token_expired:
