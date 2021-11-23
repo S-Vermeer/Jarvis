@@ -13,7 +13,6 @@ import assets.dictionary as dictionary
 import json
 
 from google.auth import jwt
-from js2py.host.jsfunctions import decodeURIComponent
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
