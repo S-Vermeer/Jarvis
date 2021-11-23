@@ -4,4 +4,3 @@ SpeechRecognition
 discord.py
 python-dotenv
 PyDrive2
-js2py
