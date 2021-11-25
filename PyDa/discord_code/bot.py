@@ -12,7 +12,6 @@ import assets.dictionary as dictionary
 
 import json
 
-from google.auth import jwt
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
@@ -32,8 +31,7 @@ async def connect_to_google_drive(guild):
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
         logging.warning(msg.content)
-        logging.warning(jwt.decode(msg.content,verify=False))
-        gauth.Auth(jwt.decode(msg.content,verify=False))
+        gauth.Auth(msg.content)
 
         logging.warning("Authorisation complete")
     elif gauth.access_token_expired:
