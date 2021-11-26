@@ -109,6 +109,13 @@ async def on_message(message):
         await tone_tags(message)
 
 
+@client.event
+async def on_reaction_add(reaction, user):
+    if user != client.user:
+        if reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
+            await discordcommands.tone_check(reaction.message)
+
+
 async def stop(message):
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
@@ -167,6 +174,5 @@ def check(author):  # check whether the message was sent by the requester
             return True
 
     return inner_check
-
 
 client.run(TOKEN)

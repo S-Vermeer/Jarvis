@@ -55,7 +55,7 @@ async def search_method(msg, message, app_id, client):
     if msg.content.lower().count("morning") >= 1:
         return good_morning(msg.guild)
 
-    if msg.content.lower().count("tone") & msg.content.lower().count("/") >= 1:
+    if msg.content.lower().count("tone") and msg.content.lower().count("/") >= 1:
         return tone_check(msg)
 
 
@@ -323,18 +323,18 @@ async def good_morning(guild):
 async def tone_check(message):
     split_message = message.content.split()
     index_tag = -1
+    messages = []
 
     for msg in split_message:
         index_tag += 1
         if msg.find("/") != -1:
-            break
+            messages.append(index_tag)
 
     response = "The following tone tags are possible: \n"
-    for tone_tag in dictionary.tone_tags:
-        logging.warning(tone_tag)
-        logging.warning(split_message[index_tag].lower().count(tone_tag[0]))
-        if tone_tag[0].lower().count(split_message[index_tag]) >= 1:
-            response += tone_tag[0] + "  =  " + tone_tag[1] + "\n"
+    for msg in messages:
+        for tone_tag in dictionary.tone_tags:
+            if tone_tag[0].lower().count(split_message[msg]) >= 1:
+                response += tone_tag[0] + "  =  " + tone_tag[1] + "\n"
     await message.channel.send(response)
 
 
