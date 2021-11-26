@@ -111,9 +111,12 @@ async def on_message(message):
 
 @client.event
 async def on_reaction_add(reaction, user):
-    if user != client.user:
-        if reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
-            await discordcommands.tone_check(reaction.message)
+    if reaction.message.guild is None:
+        return
+    if GUILD == reaction.message.guild.name:
+        if user != client.user:
+            if reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
+                await discordcommands.tone_check(reaction.message)
 
 
 async def stop(message):
