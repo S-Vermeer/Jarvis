@@ -38,19 +38,20 @@ compliments = [
 ]
 
 on_call_functions = [
-    ["how are you","How are you asks Phillip about their wellbeing."],
-    ["search {what to search}","Search will search wolframalpha (an AI) and wikipedia for an answer to your question."],
-    ["sleep @{name}","Sleep will 'inspire' people to go to bed. Listen to people when they tell you to stop though"],
-    ["hype @{name}","Hype will provide an inspiring message to the tagged person."],
-    ["jesse","Jesse will hype up one of our awesome mods, Jesse."],
+    ["how are you", "How are you asks Phillip about their wellbeing."],
+    ["search {what to search}", "Search will search wolframalpha (an AI) and wikipedia for an answer to your question."],
+    ["sleep @{name}", "Sleep will 'inspire' people to go to bed. Listen to people when they tell you to stop though"],
+    ["hype @{name}", "Hype will provide an inspiring message to the tagged person."],
+    ["jesse", "Jesse will hype up one of our awesome mods, Jesse."],
 
 ]
 
 always_functions = [
-    ["**help**","\nHelp will display all the current commands and what they do."],
-    ["**stop**","\nIf the bot is running on the server it will be restarted.\nIf Skyler is also running a bot on their pc that bot will stop working until it is manually restarted.\nCan be used when Phillip freaks out after searching"],
-    ["**99!**","\nInside joke from when the bot was created, lists a random Brooklyn99 reference."],
-    ["**names**","\nGives all the names Phillip responds to."]
+    ["**help**", "\nHelp will display all the current commands and what they do."],
+    ["**stop**", "\nIf the bot is running on the server it will be restarted.\nIf Skyler is also running a bot on their pc that bot will stop working until it is manually restarted.\nCan be used when Phillip freaks out after searching"],
+    ["**99!**", "\nInside joke from when the bot was created, lists a random Brooklyn99 reference."],
+    ["**names**", "\nGives all the names Phillip responds to."],
+    ["**tonetags**", "\nProvides a list of tone tags"]
 ]
 
 sleep_encouragements = [
@@ -63,4 +64,44 @@ good_morning = [
     "gm1",
     "gm2",
     "gm3"
+]
+
+tone_tags = [
+    ["/j", "joking"],
+    ["/hj", "half joking"],
+    ["/s", "sarcastic"],
+    ["/srs", "serious"],
+    ["/nsrs", "not serious"],
+    ["/lh", "light hearted"],
+    ["/g", "genuine (question)"],
+    ["/ij", "inside joke"],
+    ["/ref", "reference"],
+    ["/t", "teasing"],
+    ["/nm", "not mad"],
+    ["/lu", "a little upset"],
+    ["/nf", "not forced"],
+    ["/nbh", "nobody here"],
+    ["/nsb", "not subtweeting"],
+    ["/nay", "not at you"],
+    ["/nbr", "not being rude"],
+    ["/ot", "off topic"],
+    ["/th", "threat"],
+    ["/cb", "clickbait"],
+    ["/f", "fake"],
+    ["/q", "quote"],
+    ["/l", "lyrics"],
+    ["/c", "copypasta"],
+    ["/m", "metaphor"],
+    ["/li", "literal"],
+    ["/rh", "rhetorical question"],
+    ["/hyp", "hyperbole"],
+    ["/ex", "exaggeration"],
+    ["/p", "platonic"],
+    ["/r", "romantic"],
+    ["/a", "alterous"],
+    ["/sx", "||sexual|| intent"],
+    ["/nsx", "not ||sexual|| intent"],
+    ["/pos", "positive connotation"],
+    ["/neg", "negative connotation"],
+    ["/neu", "neutral"]
 ]

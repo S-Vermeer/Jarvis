@@ -30,6 +30,7 @@ async def connect_to_google_drive(guild):
 
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
+
         logging.warning(msg.content)
         gauth.Auth(msg.content)
 
@@ -105,6 +106,7 @@ async def on_message(message):
         await name_list(message)
         await b99(message)
         await help_msg(message)
+        await tone_tags(message)
 
 
 async def stop(message):
@@ -142,6 +144,18 @@ async def help_msg(message):
 
         for function in dictionary.on_call_functions:
             response = response + function[0] + "```" + function[1] + "```" + "\n"
+        await message.channel.send(response)
+
+
+async def tone_tags(message):
+    response = "tone tags / tone indicators are things you can include with text to indicate what the tone of it is. \n"
+    response += "some people have difficulty picking up on tone. communicating through text only makes this harder " \
+                "due to lack of audio and physical clues (voice inflection, body language, facial expressions, etc.) "
+    response += "Tagging what tone you are using can be very helpful for others understanding of what you're saying, " \
+                "clarification, avoiding miscommunications, etc. \n"
+    if message.content.lower() == 'tonetags':
+        for tone_tag in dictionary.tone_tags:
+            response = response + tone_tag[0] + "  =  " + tone_tag[1] + "\n"
         await message.channel.send(response)
 
 
