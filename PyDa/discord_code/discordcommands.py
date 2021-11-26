@@ -56,6 +56,8 @@ async def search_method(msg, message, app_id, client):
         return good_morning(msg.guild)
 
     if msg.content.lower().count("tone") and msg.content.lower().count("/") >= 1:
+        response = await tone_check(msg)
+        await msg.channel.send(response)
         return tone_check(msg)
 
 
@@ -335,7 +337,7 @@ async def tone_check(message):
         for tone_tag in dictionary.tone_tags:
             if tone_tag[0].lower().count(split_message[msg]) >= 1:
                 response += tone_tag[0] + "  =  " + tone_tag[1] + "\n"
-    await message.channel.send(response)
+    return response
 
 
 @tasks.loop(seconds=10)
