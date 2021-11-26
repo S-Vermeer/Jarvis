@@ -43,6 +43,7 @@ on_call_functions = [
     ["sleep @{name}", "Sleep will 'inspire' people to go to bed. Listen to people when they tell you to stop though"],
     ["hype @{name}", "Hype will provide an inspiring message to the tagged person."],
     ["jesse", "Jesse will hype up one of our awesome mods, Jesse."],
+    ["tone /tag", "A specific tone tag that matches your description will be described"]
 
 ]
 

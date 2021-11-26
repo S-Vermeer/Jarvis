@@ -55,6 +55,9 @@ async def search_method(msg, message, app_id, client):
     if msg.content.lower().count("morning") >= 1:
         return good_morning(msg.guild)
 
+    if msg.content.lower().count("tone") & msg.content.lower().count("/") >= 1:
+        return tone_check(msg)
+
 
 async def calling_command(message, client, app_id, currentdrive, currenthttp):
     global drive
@@ -315,6 +318,24 @@ async def good_morning(guild):
     morning_message = "good morning test"
     await called_every_five_min()
     await dm_member(skyler, morning_message)
+
+
+async def tone_check(message):
+    split_message = message.content.split()
+    index_tag = -1
+
+    for msg in split_message:
+        index_tag += 1
+        if msg.find("/") != -1:
+            break
+
+    response = "The following tone tags are possible: \n"
+    for tone_tag in dictionary.tone_tags:
+        logging.warning(tone_tag)
+        logging.warning(split_message[index_tag].lower().count(tone_tag[0]))
+        if tone_tag[0].lower().count(split_message[index_tag]) >= 1:
+            response += tone_tag[0] + "  =  " + tone_tag[1] + "\n"
+    await message.channel.send(response)
 
 
 @tasks.loop(seconds=10)
