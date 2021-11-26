@@ -2,8 +2,6 @@ import io
 import json
 import logging
 
-# import discord
-import discord
 import requests
 import wikipedia as wp
 import wolframalpha as wa
@@ -50,7 +48,7 @@ async def search_method(msg, message, app_id, client):
         return jesse_hype(msg)
 
     if msg.content.lower().count("drive") >= 1:
-        return drive_command(msg, client, app_id)
+        return drive_command(msg, client)
 
     if msg.content.lower().count("morning") >= 1:
         return good_morning(msg.guild)
@@ -149,7 +147,7 @@ async def search_answer(message, msg, app_id, client):
 
 async def get_question_response(question, message, client):
     await message.channel.send(question)
-    return await wait_for_response_message_drive(message,client)
+    return await wait_for_response_message_drive(message, client)
 
 
 async def select_file(message, client):
@@ -157,34 +155,38 @@ async def select_file(message, client):
     return drive.CreateFile({'id': file_id.content})
 
 
-async def drive_command(message, client, app_id):
+async def drive_command(message, client):
+
     if message.content.lower().count("inventory") >= 1:
         await drive_inventory(message)
 
+    title_question = 'Please specify the title for the document'
+
     if message.content.lower().count("create") >= 1:
-        title_msg = await get_question_response('Please specify the title for the document', message, client)
-        content_msg = await get_question_response('Please specify the content for the document', title_msg,client)
+        title_msg = await get_question_response(title_question, message, client)
+        content_msg = await get_question_response('Please specify the content for the document', title_msg, client)
         create_file(title_msg.content, content_msg.content)
         return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
 
     if message.content.lower().count("change name") >= 1:
         await drive_inventory(message)
         file = await select_file(message, client)
-        title_msg = await get_question_response('Please specify the title for the document', message, client)
-        change_title(file,title_msg.content)
+        title_msg = await get_question_response(title_question, message, client)
+        change_title(file, title_msg.content)
         return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
         file = await select_file(message, client)
-        content_to_add = await get_question_response('Please specify the text you want to add to the document', message, client)
-        add_to_content(file,content_to_add.content)
+        addition_question = 'Please specify the text you want to add to the document'
+        content_to_add = await get_question_response(addition_question, message, client)
+        add_to_content(file, content_to_add.content)
         return await message.channel.send("add content method triggered")
 
     if message.content.lower().count("add image") >= 1:
-        title_msg = await get_question_response('Please specify the title for the document', message, client)
-        content_msg = await get_question_response('Please upload the image(s)', title_msg,client)
+        title_msg = await get_question_response(title_question, message, client)
+        content_msg = await get_question_response('Please upload the image(s)', title_msg, client)
         path = content_msg.attachments[0].url
-        create_image_file(title_msg.content,path)
+        create_image_file(title_msg.content, path)
         return await message.channel.send("The image was added to the drive")
 
 
@@ -222,7 +224,7 @@ def search_internet(input_query, app_id):
         return [no_results]
 
     except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        logging.exception('error while accessing the searches that couldn\'t be specified + e')
+        logging.exception('error while accessing the searches that couldn\'t be specified ' + e)
         return no_results
 
 
@@ -257,9 +259,9 @@ def create_file(title, content):
 
 
 def create_image_file(title, content):
-    url = content # Please set the direct link of the image file.
-    filename = title # Please set the filename on Google Drive.
-    folder_id = 'root' # Please set the folder ID. The file is put to this folder.
+    url = content  # Please set the direct link of the image file.
+    filename = title  # Please set the filename on Google Drive.
+    folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
 
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
@@ -271,7 +273,7 @@ def create_image_file(title, content):
         'data': ('metadata', json.dumps(metadata), 'application/json'),
         'file': io.BytesIO(requests.get(url).content)
     }
-    r = requests.post(
+    requests.post(
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         headers={"Authorization": "Bearer " + gauth.credentials.access_token},
         files=files

@@ -113,12 +113,11 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     if reaction.message.guild is None:
         return
-    if GUILD == reaction.message.guild.name:
-        if user != client.user:
-            if reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
-                response = "You requested tone tag information about: " + reaction.message.content + "\n"
-                response += await discordcommands.tone_check(reaction.message)
-                await discordcommands.dm_member(user, response)
+    if GUILD == reaction.message.guild.name and user != client.user:
+        if reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
+            response = "You requested tone tag information about: " + reaction.message.content + "\n"
+            response += await discordcommands.tone_check(reaction.message)
+            await discordcommands.dm_member(user, response)
 
 
 async def stop(message):
@@ -179,5 +178,6 @@ def check(author):  # check whether the message was sent by the requester
             return True
 
     return inner_check
+
 
 client.run(TOKEN)
