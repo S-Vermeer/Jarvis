@@ -9,8 +9,11 @@ import os
 import random
 
 import logging
+from glob import glob
 
 import discord
+from discord.ext import commands
+from discord.ext.commands import bot
 
 from dotenv import load_dotenv
 
@@ -34,7 +37,7 @@ async def connect_to_google_drive(guild):
         uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
         skyler = guild.get_member(uid)
-        msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
+        msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, bot)
 
         logging.warning(msg.content)
         gauth.Auth(msg.content)
@@ -63,7 +66,7 @@ intents = discord.Intents.default()
 intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the members
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="", intents=intents)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -81,25 +84,36 @@ TOKEN, GUILD, app_id = get_env_var()
 # ᕙ(`-´)ᕗ Global variables that are assigned when the google drive is connected
 drive = None
 http = None
+print(glob("**/cogs/modules/*.py"))
+cogs = [path.split("\\")[-1][:-3] for path in glob("cogs/modules/*.py")]
 
 
 # ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
-@client.event
+@bot.event
 async def on_ready():
     # ᕙ(`-´)ᕗ from all the guilds that the bot is connected to, assign to guild the one that has the name from the .env
-    guild = discord.utils.get(client.guilds, name=GUILD)
+    guild = discord.utils.get(bot.guilds, name=GUILD)
     logging.warning(
-        f'{client.user} is connected to the following guild:\n'
+        f'{bot.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
     logging.warning("There are " + str(len(guild.members)) + " guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
     logging.warning("ready")
+    setup()
+
+
+def setup():
+    print(len(cogs))
+    for cog in cogs:
+        bot.load_extension(f"cogs.modules.{cog}")
+        print(f"{cog} cog loaded")
+    print("setup complete")
 
 
 # ᕙ(`-´)ᕗ When the bot is notified of a message, this is triggered
-@client.event
+@bot.event
 async def on_message(message):
     if message.guild is None:
         return
@@ -107,10 +121,10 @@ async def on_message(message):
     # this is enacted
     if GUILD == message.guild.name:
         # ᕙ(`-´)ᕗ if the message was from the bot, don't do anything
-        if message.author == client.user:
+        if message.author == bot.user:
             return
         # ᕙ(`-´)ᕗ See whether one of the bots names was called
-        await discordcommands.calling_command(message, client, app_id, drive, http)
+        await discordcommands.calling_command(message, bot, app_id, drive, http)
 
         # ᕙ(`-´)ᕗ These are various options that work without having to say the name first
         await stop(message)
@@ -121,13 +135,13 @@ async def on_message(message):
 
 
 # ᕙ(`-´)ᕗ If a reaction is added to a message since the bot started listening, this is triggered.
-@client.event
+@bot.event
 async def on_reaction_add(reaction, user):
     if reaction.message.guild is None:
         return
     # ᕙ(`-´)ᕗ If the guild is correct, it is not sent by the bot, the reaction is an emoji with a monocle and there
     # is at least one / in the message, this is triggered
-    if GUILD == reaction.message.guild.name and user != client.user and \
+    if GUILD == reaction.message.guild.name and user != bot.user and \
             reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
         # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
         response = "You requested tone tag information about: " + reaction.message.content + "\n"
@@ -140,7 +154,7 @@ async def stop(message):
     # ᕙ(`-´)ᕗ The message has to be solely stop, so it when it is said in a sentence it isn't triggered
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
-        await client.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
+        await bot.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
 
 
 # ᕙ(`-´)ᕗ The bot responds with a list of names that they listen to for more advanced requests
@@ -202,4 +216,4 @@ def check(author):
     return inner_check
 
 
-client.run(TOKEN)
+bot.run(TOKEN)

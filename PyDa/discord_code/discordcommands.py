@@ -21,9 +21,9 @@ from pydrive2.auth import GoogleAuth
 
 
 # ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
-async def dm_member_wait_for_response(member, message, client):
+async def dm_member_wait_for_response(member, message, bot):
     await dm_member(member, message)
-    msg = await client.wait_for('message', check=check(member), timeout=60)
+    msg = await bot.wait_for('message', check=check(member), timeout=60)
 
     return msg
 
@@ -41,12 +41,12 @@ def connect_wa(app_id):
 
 
 # ᕙ(`-´)ᕗ Check which action is asked for after phillip is called
-async def search_method(msg, message, app_id, client):
+async def search_method(msg, message, app_id, bot):
     if msg.content.lower().count("how are you") >= 1:
         return wellbeing(message)
 
     if msg.content.lower().count("search") >= 1:
-        return search_answer(message, msg, app_id, client)
+        return search_answer(message, msg, app_id, bot)
 
     if msg.content.lower().count("sleep") >= 1:
         return sleep_helper(msg)
@@ -58,7 +58,7 @@ async def search_method(msg, message, app_id, client):
         return jesse_hype(msg)
 
     if msg.content.lower().count("drive") >= 1:
-        return drive_command(msg, client)
+        return drive_command(msg, bot)
 
     if msg.content.lower().count("morning") >= 1:
         return good_morning(msg.guild)
@@ -73,7 +73,7 @@ http = None
 
 
 # ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
-async def calling_command(message, client, app_id, currentdrive, currenthttp):
+async def calling_command(message, bot, app_id, currentdrive, currenthttp):
     global drive
     global http
     drive = currentdrive
@@ -97,12 +97,12 @@ async def calling_command(message, client, app_id, currentdrive, currenthttp):
 
                     return inner_check
 
-                msg = await client.wait_for('message', check=check_author(message.author), timeout=15)
-                method = await search_method(msg, message, app_id, client)
+                msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
+                method = await search_method(msg, message, app_id, bot)
                 await method
 
             except asyncio.exceptions.TimeoutError as e:
-                await message.remove_reaction('👍', client.user)
+                await message.remove_reaction('👍', bot.user)
                 logging.warning("warning: " + repr(e))
 
 
@@ -152,7 +152,7 @@ async def jesse_hype(message):
 
 
 # ᕙ(`-´)ᕗ Search for the answer of a question on wikipedia and wolframalpha
-async def search_answer(message, msg, app_id, client):
+async def search_answer(message, msg, app_id, bot):
     answer = search_internet(msg.content, app_id)
 
     msg = await message.channel.send(answer[0])
@@ -161,26 +161,26 @@ async def search_answer(message, msg, app_id, client):
     if len(answer) > 1:
         await msg.add_reaction('👍')
 
-        @client.event
+        @bot.event
         async def on_reaction_add(reaction, user):
-            if reaction.emoji == '👍' and user.id != client.user.id:
+            if reaction.emoji == '👍' and user.id != bot.user.id:
                 await message.channel.send(answer[1])
 
 
 # ᕙ(`-´)ᕗ Send a question and return the result
-async def get_question_response(question, message, client):
+async def get_question_response(question, message, bot):
     await message.channel.send(question)
-    return await wait_for_response_message_drive(message, client)
+    return await wait_for_response_message_drive(message, bot)
 
 
 # ᕙ(`-´)ᕗ Select a file based on the specified id. 'Creating' only replicates it, if it isn't uploaded, nothing happens/
-async def select_file(message, client):
-    file_id = await get_question_response('Please specify the id of the document to change', message, client)
+async def select_file(message, bot):
+    file_id = await get_question_response('Please specify the id of the document to change', message, bot)
     return drive.CreateFile({'id': file_id.content})
 
 
 # ᕙ(`-´)ᕗ Select one of the drive commands
-async def drive_command(message, client):
+async def drive_command(message, bot):
 
     if message.content.lower().count("inventory") >= 1:
         await drive_inventory(message)
@@ -188,28 +188,28 @@ async def drive_command(message, client):
     title_question = 'Please specify the title for the document'
 
     if message.content.lower().count("create") >= 1:
-        title_msg = await get_question_response(title_question, message, client)
-        content_msg = await get_question_response('Please specify the content for the document', title_msg, client)
+        title_msg = await get_question_response(title_question, message, bot)
+        content_msg = await get_question_response('Please specify the content for the document', title_msg, bot)
         create_file(title_msg.content, content_msg.content)
         return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
 
     if message.content.lower().count("change name") >= 1:
         await drive_inventory(message)
-        file = await select_file(message, client)
-        title_msg = await get_question_response(title_question, message, client)
+        file = await select_file(message, bot)
+        title_msg = await get_question_response(title_question, message, bot)
         change_title(file, title_msg.content)
         return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
-        file = await select_file(message, client)
+        file = await select_file(message, bot)
         addition_question = 'Please specify the text you want to add to the document'
-        content_to_add = await get_question_response(addition_question, message, client)
+        content_to_add = await get_question_response(addition_question, message, bot)
         add_to_content(file, content_to_add.content)
         return await message.channel.send("add content method triggered")
 
     if message.content.lower().count("add image") >= 1:
-        title_msg = await get_question_response(title_question, message, client)
-        content_msg = await get_question_response('Please upload the image(s)', title_msg, client)
+        title_msg = await get_question_response(title_question, message, bot)
+        content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
         path = content_msg.attachments[0].url
         create_image_file(title_msg.content, path)
         return await message.channel.send("The image was added to the drive")
@@ -268,16 +268,13 @@ def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the req
 async def drive_inventory(message):
     # ᕙ(`-´)ᕗ View all folders and file in your Google Drive
     file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-    logging.warning("reached2")
     flag = False
     list_msg = ""
     for file in file_list:
         list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
         flag = True
-    logging.warning("reached3")
     if flag:
         await message.channel.send(list_msg)
-    logging.warning("reached4")
     if not flag:
         message.channel.send('Sorry! no file found...')
 
@@ -328,7 +325,7 @@ def add_to_content(file, content_to_add):
 
 
 # ᕙ(`-´)ᕗ Send something but need a response to continue
-async def require_response(message, client, app_id):
+async def require_response(message, bot, app_id):
     try:
         await message.add_reaction('👍')
 
@@ -342,12 +339,12 @@ async def require_response(message, client, app_id):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=author_check(message.author), timeout=15)
-        method = await search_method(msg, message, app_id, client)
+        msg = await bot.wait_for('message', check=author_check(message.author), timeout=15)
+        method = await search_method(msg, message, app_id, bot)
         await method
 
     except Exception as e:
-        await message.remove_reaction('👍', client.user)
+        await message.remove_reaction('👍', bot.user)
         logging.warning(repr(e))
 
 
@@ -394,7 +391,7 @@ async def before_printer(self):
 
 
 # ᕙ(`-´)ᕗ Wai for a response, specifically for the drive
-async def wait_for_response_message_drive(message, client):
+async def wait_for_response_message_drive(message, bot):
     try:
         await message.add_reaction('👍')
 
@@ -409,9 +406,9 @@ async def wait_for_response_message_drive(message, client):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=check_author(message.author), timeout=15)
+        msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
         return msg
 
     except Exception as e:
-        await message.remove_reaction('👍', client.user)
+        await message.remove_reaction('👍', bot.user)
         logging.warning(repr(e))
