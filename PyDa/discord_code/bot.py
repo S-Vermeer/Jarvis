@@ -1,3 +1,10 @@
+"""
+Comment legend
+ᕙ(`-´)ᕗ - Explanation
+ʕ•́ᴥ•̀ʔっ - To do
+(ㆆ_ㆆ) - Bug
+"""
+
 import os
 import random
 
@@ -17,16 +24,16 @@ from pydrive2.drive import GoogleDrive
 
 
 async def connect_to_google_drive(guild):
-    # Change file path for settings file (hidden in github)
+    # ᕙ(`-´)ᕗ Change file path for settings file (hidden in github)
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
 
-    gauth.LoadCredentialsFile("credentials/mycreds.txt")
+    gauth.LoadCredentialsFile("credentials/mycreds.txt") # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
     if gauth.credentials is None:
-        # Get the url that the user must use to give access to google drive
+        # ᕙ(`-´)ᕗ Get the url that the user must use to give access to google drive
         auth_url = gauth.GetAuthUrl()
 
-        uid = 245989473408647171  # Skyler (Developer) User ID so the message is DMed to them
+        uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
         skyler = guild.get_member(uid)
         msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
@@ -36,7 +43,8 @@ async def connect_to_google_drive(guild):
 
         logging.warning("Authorisation complete")
     elif gauth.access_token_expired:
-        # Refresh them if expired
+        # ᕙ(`-´)ᕗ Refresh them if expired
+        # (ㆆ_ㆆ) Does not Refresh yet?
         open('credentials/mycreds.txt', 'w').close()
         logging.warning("refresh")
     else:
