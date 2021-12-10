@@ -1,3 +1,10 @@
+"""
+Comment legend
+ᕙ(`-´)ᕗ - Explanation
+ʕ•́ᴥ•̀ʔっ - To do
+(ㆆ_ㆆ) - Bug
+"""
+import asyncio
 import io
 import json
 import logging
@@ -13,24 +20,27 @@ from discord.ext import tasks
 from pydrive2.auth import GoogleAuth
 
 
+# ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
 async def dm_member_wait_for_response(member, message, client):
-    await member.create_dm()
-    await member.dm_channel.send(message)
+    await dm_member(member, message)
     msg = await client.wait_for('message', check=check(member), timeout=60)
 
     return msg
 
 
+# ᕙ(`-´)ᕗ Send a direct message to a member
 async def dm_member(member, message):
     await member.create_dm()
     await member.dm_channel.send(message)
 
 
+# ᕙ(`-´)ᕗ Connect to the wolfram alpha client
 def connect_wa(app_id):
     client = wa.Client(app_id)
     return client
 
 
+# ᕙ(`-´)ᕗ Check which action is asked for after phillip is called
 async def search_method(msg, message, app_id, client):
     if msg.content.lower().count("how are you") >= 1:
         return wellbeing(message)
@@ -58,7 +68,11 @@ async def search_method(msg, message, app_id, client):
         await msg.channel.send(response)
         return tone_check(msg)
 
+drive = None
+http = None
 
+
+# ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
 async def calling_command(message, client, app_id, currentdrive, currenthttp):
     global drive
     global http
@@ -69,10 +83,12 @@ async def calling_command(message, client, app_id, currentdrive, currenthttp):
             response = 'At your service'
             await message.channel.send(response)
             try:
+                # ᕙ(`-´)ᕗ this is added to see whether Phillip is still listening
                 await message.add_reaction('👍')
 
                 def check_author(author):
-
+                    # ᕙ(`-´)ᕗ Check whether the person who sent sent the request for phillip, is also the one the
+                    # message is from
                     def inner_check(message_to_check):
                         if message_to_check.author != author:
                             return False
@@ -85,26 +101,30 @@ async def calling_command(message, client, app_id, currentdrive, currenthttp):
                 method = await search_method(msg, message, app_id, client)
                 await method
 
-            except Exception as e:
+            except asyncio.exceptions.TimeoutError as e:
                 await message.remove_reaction('👍', client.user)
-                logging.warning(str(e))
+                logging.warning("warning: " + repr(e))
 
 
+# ᕙ(`-´)ᕗ How is Phillip doing?
 async def wellbeing(message):
-    response = 'Well I can respond, that\'s something'
+    response = 'Well I can respond, that\'s something'  # ʕ•́ᴥ•̀ʔっ More responses to how Phillip is doing
     await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Prompts someone who is tagged to sleep
 async def sleep_helper(message):
     response = (random.choice(dictionary.sleep_encouragements) % message.mentions[0].mention)
     await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Compliments someone who is tagged
 async def complimenter(message):
     response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
     await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Hypes Jesse, a mod from the Avieno discord
 async def jesse_hype(message):
     uid = '<@745738275968516176>'
     response = (
@@ -131,11 +151,13 @@ async def jesse_hype(message):
     await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Search for the answer of a question on wikipedia and wolframalpha
 async def search_answer(message, msg, app_id, client):
     answer = search_internet(msg.content, app_id)
 
     msg = await message.channel.send(answer[0])
 
+    # ᕙ(`-´)ᕗ If there is more than one answer, an additional answer can be gotten through reacting with a thumbs up
     if len(answer) > 1:
         await msg.add_reaction('👍')
 
@@ -145,16 +167,19 @@ async def search_answer(message, msg, app_id, client):
                 await message.channel.send(answer[1])
 
 
+# ᕙ(`-´)ᕗ Send a question and return the result
 async def get_question_response(question, message, client):
     await message.channel.send(question)
     return await wait_for_response_message_drive(message, client)
 
 
+# ᕙ(`-´)ᕗ Select a file based on the specified id. 'Creating' only replicates it, if it isn't uploaded, nothing happens/
 async def select_file(message, client):
     file_id = await get_question_response('Please specify the id of the document to change', message, client)
     return drive.CreateFile({'id': file_id.content})
 
 
+# ᕙ(`-´)ᕗ Select one of the drive commands
 async def drive_command(message, client):
 
     if message.content.lower().count("inventory") >= 1:
@@ -190,6 +215,7 @@ async def drive_command(message, client):
         return await message.channel.send("The image was added to the drive")
 
 
+# ᕙ(`-´)ᕗ Search the internet for a response on the inputted query
 def search_internet(input_query, app_id):
     client = connect_wa(app_id)
     no_results = "No results"
@@ -215,7 +241,7 @@ def search_internet(input_query, app_id):
                 wiki_res = wp.summary(input_query, sentences=2)
                 return wiki_res
             except BaseException as e:
-                logging.exception('error while accessing the wiki summary: ' + str(e))
+                logging.exception('error while accessing the wiki summary: ' + repr(e))
                 return no_results
 
     except (
@@ -224,11 +250,11 @@ def search_internet(input_query, app_id):
         return [no_results]
 
     except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
-        logging.exception('error while accessing the searches that couldn\'t be specified ' + e)
+        logging.exception('error while accessing the searches that couldn\'t be specified ' + repr(e))
         return no_results
 
 
-def check(author):  # check whether the message was sent by the requester
+def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the requester
     def inner_check(message):
         if message.author != author or message.channel != author.dm_channel:
             return False
@@ -238,31 +264,38 @@ def check(author):  # check whether the message was sent by the requester
     return inner_check
 
 
+# ᕙ(`-´)ᕗ Displays the files from the drive
 async def drive_inventory(message):
-    # View all folders and file in your Google Drive
+    # ᕙ(`-´)ᕗ View all folders and file in your Google Drive
     file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+    logging.warning("reached2")
     flag = False
     list_msg = ""
     for file in file_list:
         list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
         flag = True
+    logging.warning("reached3")
     if flag:
         await message.channel.send(list_msg)
+    logging.warning("reached4")
     if not flag:
         message.channel.send('Sorry! no file found...')
 
 
+# ᕙ(`-´)ᕗ Make a new file and upload it to the drive
 def create_file(title, content):
     file = drive.CreateFile({'title': title})
     file.SetContentString(content)
-    file.Upload()  # Files.insert()
+    file.Upload()
 
 
+# ᕙ(`-´)ᕗ Upload a new image
 def create_image_file(title, content):
     url = content  # Please set the direct link of the image file.
     filename = title  # Please set the filename on Google Drive.
     folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
 
+    # ᕙ(`-´)ᕗ To get these requests, LocalWebserverAuth has to be used
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()
     metadata = {
@@ -280,18 +313,21 @@ def create_image_file(title, content):
     )
 
 
+# ᕙ(`-´)ᕗ Change the title of an existing file
 def change_title(file, newname):
     file.FetchMetadata(fields="title")
     file['title'] = newname  # Change title of the file
     file.Upload()  # Files.patch()
 
 
+# ᕙ(`-´)ᕗ Add some content to an existing file
 def add_to_content(file, content_to_add):
     content = file.GetContentString()  # 'Hello'
     file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
-    file.Upload()  # Files.update()
+    file.Upload()
 
 
+# ᕙ(`-´)ᕗ Send something but need a response to continue
 async def require_response(message, client, app_id):
     try:
         await message.add_reaction('👍')
@@ -312,11 +348,12 @@ async def require_response(message, client, app_id):
 
     except Exception as e:
         await message.remove_reaction('👍', client.user)
-        logging.warning(str(e))
+        logging.warning(repr(e))
 
 
+# ᕙ(`-´)ᕗ Sends a good morning message to whoever requests it at a certain time
 async def good_morning(guild):
-    uid = 245989473408647171  # Skyler (Developer) User ID so the message is DMed to them
+    uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
     skyler = guild.get_member(uid)
     morning_message = "good morning test"
@@ -324,6 +361,7 @@ async def good_morning(guild):
     await dm_member(skyler, morning_message)
 
 
+# ᕙ(`-´)ᕗ Check the tone tags based on your own message
 async def tone_check(message):
     split_message = message.content.split()
     index_tag = -1
@@ -342,17 +380,20 @@ async def tone_check(message):
     return response
 
 
+# ᕙ(`-´)ᕗ Attempt to start a task every x amount of time
 @tasks.loop(seconds=10)
 async def called_every_five_min():
     logging.warning("called")
 
 
+# ᕙ(`-´)ᕗ Something that happens before the loop starts
 @called_every_five_min.before_loop
 async def before_printer(self):
     logging.warning('waiting...')
     await self.bot.wait_until_ready()
 
 
+# ᕙ(`-´)ᕗ Wai for a response, specifically for the drive
 async def wait_for_response_message_drive(message, client):
     try:
         await message.add_reaction('👍')
@@ -373,4 +414,4 @@ async def wait_for_response_message_drive(message, client):
 
     except Exception as e:
         await message.remove_reaction('👍', client.user)
-        logging.warning(str(e))
+        logging.warning(repr(e))
