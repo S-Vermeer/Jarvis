@@ -240,14 +240,18 @@ def check(author):  # check whether the message was sent by the requester
 
 async def drive_inventory(message):
     # View all folders and file in your Google Drive
+    logging.warning("reached1")
     file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+    logging.warning("reached2")
     flag = False
     list_msg = ""
     for file in file_list:
         list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
         flag = True
+    logging.warning("reached3")
     if flag:
         await message.channel.send(list_msg)
+    logging.warning("reached4")
     if not flag:
         message.channel.send('Sorry! no file found...')
 
