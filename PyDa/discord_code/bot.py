@@ -17,8 +17,6 @@ from dotenv import load_dotenv
 import discordcommands
 import assets.dictionary as dictionary
 
-import json
-
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
@@ -28,7 +26,7 @@ async def connect_to_google_drive(guild):
     GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
     gauth = GoogleAuth()
 
-    gauth.LoadCredentialsFile("credentials/mycreds.txt") # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
+    gauth.LoadCredentialsFile("credentials/mycreds.txt")  # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
     if gauth.credentials is None:
         # ᕙ(`-´)ᕗ Get the url that the user must use to give access to google drive
         auth_url = gauth.GetAuthUrl()
@@ -48,26 +46,27 @@ async def connect_to_google_drive(guild):
         open('credentials/mycreds.txt', 'w').close()
         logging.warning("refresh")
     else:
-        # Initialize the saved creds
+        # ᕙ(`-´)ᕗ Initialize the saved creds
         gauth.Authorize()
         logging.warning("used saved creds")
-    # Save the current credentials to a file
+    # ᕙ(`-´)ᕗ Save the current credentials to a file
     gauth.SaveCredentialsFile("credentials/mycreds.txt")
 
     gdrive = GoogleDrive(gauth)
 
-    # Create httplib.Http() object.
+    # ᕙ(`-´)ᕗ Create httplib.Http() object.
     http_obj = gdrive.auth.Get_Http_Object()
     return gdrive, http_obj
 
-
+# ᕙ(`-´)ᕗ Discord.py requires intents to open the relevant gateways to make sure only the events you need get triggered.
 intents = discord.Intents.default()
-intents.members = True
-intents.reactions = True
+intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the members
+intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 client = discord.Client(intents=intents)
 
 
+# ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
 def get_env_var():
     load_dotenv()
     token = os.getenv('DISCORD_TOKEN')
@@ -78,27 +77,25 @@ def get_env_var():
 
 
 TOKEN, GUILD, app_id = get_env_var()
-print(TOKEN)
-print(GUILD)
 
+# ᕙ(`-´)ᕗ Global variables that are assigned when the google drive is connected
 drive = None
 http = None
 
 
+# ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
 @client.event
 async def on_ready():
+    # ᕙ(`-´)ᕗ from all the guilds that the bot is connected to, assign to guild the one that has the name from the .env
     guild = discord.utils.get(client.guilds, name=GUILD)
-    logging.warning(
+    logging.info(
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
-    logging.warning(os.getcwd())
-    with open('credentials/client_secrets.json') as json_file:
-        logging.warning(json.load(json_file))
-    print(len(guild.members))
+    logging.info("There are " + str(len(guild.members)) + " guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
-    print("done")
+    logging.info("completed")
 
 
 @client.event
