@@ -95,18 +95,24 @@ async def on_ready():
     logging.warning("There are " + str(len(guild.members)) + " guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
-    logging.warning("completed")
+    logging.warning("ready")
 
 
+# ᕙ(`-´)ᕗ When the bot is notified of a message, this is triggered
 @client.event
 async def on_message(message):
     if message.guild is None:
         return
+    # ᕙ(`-´)ᕗ If the guild the message is from, is the guild that this version of Phillip is listening for,
+    # this is enacted
     if GUILD == message.guild.name:
+        # ᕙ(`-´)ᕗ if the message was from the bot, don't do anything
         if message.author == client.user:
             return
+        # ᕙ(`-´)ᕗ See whether one of the bots names was called
         await discordcommands.calling_command(message, client, app_id, drive, http)
 
+        # ᕙ(`-´)ᕗ These are various options that work without having to say the name first
         await stop(message)
         await name_list(message)
         await b99(message)
@@ -114,23 +120,30 @@ async def on_message(message):
         await tone_tags(message)
 
 
+# ᕙ(`-´)ᕗ If a reaction is added to a message since the bot started listening, this is triggered.
 @client.event
 async def on_reaction_add(reaction, user):
     if reaction.message.guild is None:
         return
+    # ᕙ(`-´)ᕗ If the guild is correct, it is not sent by the bot, the reaction is an emoji with a monocle and there
+    # is at least one / in the message, this is triggered
     if GUILD == reaction.message.guild.name and user != client.user and \
             reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
+        # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
         response = "You requested tone tag information about: " + reaction.message.content + "\n"
         response += await discordcommands.tone_check(reaction.message)
         await discordcommands.dm_member(user, response)
 
 
+# ᕙ(`-´)ᕗ Phillip is shut down, when they are misbehaving
 async def stop(message):
+    # ᕙ(`-´)ᕗ The message has to be solely stop, so it when it is said in a sentence it isn't triggered
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
-        await client.close()
+        await client.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
 
 
+# ᕙ(`-´)ᕗ The bot responds with a list of names that they listen to for more advanced requests
 async def name_list(message):
     if message.content.lower() == 'names':
         response = "Phillip responds to:\n"
@@ -139,12 +152,14 @@ async def name_list(message):
         await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Easter egg from original development, sends a random brooklyn 99 quote
 async def b99(message):
     if message.content == '99!':
         response = random.choice(dictionary.brooklyn_99_quotes)
         await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Phillip sends a list of all the different things they can do.
 async def help_msg(message):
     if message.content.lower() == 'help':
         response = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below.\nYou don't have to call my " \
@@ -163,6 +178,7 @@ async def help_msg(message):
         await message.channel.send(response)
 
 
+# ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
 async def tone_tags(message):
     response = "tone tags / tone indicators are things you can include with text to indicate what the tone of it is. \n"
     response += "some people have difficulty picking up on tone. communicating through text only makes this harder " \
@@ -175,7 +191,8 @@ async def tone_tags(message):
         await message.channel.send(response)
 
 
-def check(author):  # check whether the message was sent by the requester
+# ᕙ(`-´)ᕗ Check whether the message was sent by the requester
+def check(author):
     def inner_check(message):
         if message.author != author:
             return False
