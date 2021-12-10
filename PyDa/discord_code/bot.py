@@ -88,14 +88,14 @@ http = None
 async def on_ready():
     # ᕙ(`-´)ᕗ from all the guilds that the bot is connected to, assign to guild the one that has the name from the .env
     guild = discord.utils.get(client.guilds, name=GUILD)
-    logging.info(
+    logging.warning(
         f'{client.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
-    logging.info("There are " + str(len(guild.members)) + " guild members")
+    logging.warning("There are " + str(len(guild.members)) + " guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
-    logging.info("completed")
+    logging.warning("completed")
 
 
 @client.event
