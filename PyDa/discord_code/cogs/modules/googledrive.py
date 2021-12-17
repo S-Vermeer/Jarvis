@@ -4,7 +4,7 @@ from discord.ext import commands
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
-from PyDa.discord_code import discordcommands
+import discordcommands
 
 
 class GoogleDriveCog(commands.Cog):
