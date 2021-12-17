@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from discord.ext import commands
 from pydrive2.auth import GoogleAuth
