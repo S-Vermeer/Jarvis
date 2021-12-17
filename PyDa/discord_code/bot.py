@@ -9,7 +9,6 @@ import os
 import random
 
 import logging
-from glob import glob
 
 import discord
 from discord.ext import commands
@@ -20,53 +19,26 @@ from dotenv import load_dotenv
 import discordcommands
 import assets.dictionary as dictionary
 
-from pydrive2.auth import GoogleAuth
-from pydrive2.drive import GoogleDrive
-
-
-async def connect_to_google_drive(guild):
-    # ᕙ(`-´)ᕗ Change file path for settings file (hidden in github)
-    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
-    gauth = GoogleAuth()
-
-    gauth.LoadCredentialsFile("credentials/mycreds.txt")  # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
-    if gauth.credentials is None:
-        # ᕙ(`-´)ᕗ Get the url that the user must use to give access to google drive
-        auth_url = gauth.GetAuthUrl()
-
-        uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
-
-        skyler = guild.get_member(uid)
-        msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, bot)
-
-        logging.warning(msg.content)
-        gauth.Auth(msg.content)
-
-        logging.warning("Authorisation complete")
-    elif gauth.access_token_expired:
-        # ᕙ(`-´)ᕗ Refresh them if expired
-        # (ㆆ_ㆆ) Does not Refresh yet?
-        open('credentials/mycreds.txt', 'w').close()
-        logging.warning("refresh")
-    else:
-        # ᕙ(`-´)ᕗ Initialize the saved creds
-        gauth.Authorize()
-        logging.warning("used saved creds")
-    # ᕙ(`-´)ᕗ Save the current credentials to a file
-    gauth.SaveCredentialsFile("credentials/mycreds.txt")
-
-    gdrive = GoogleDrive(gauth)
-
-    # ᕙ(`-´)ᕗ Create httplib.Http() object.
-    http_obj = gdrive.auth.Get_Http_Object()
-    return gdrive, http_obj
-
 # ᕙ(`-´)ᕗ Discord.py requires intents to open the relevant gateways to make sure only the events you need get triggered.
 intents = discord.Intents.default()
 intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the members
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
+cog_names = ["googledrive"]
+
+
+async def cogs_load():
+    for cog in cog_names:
+        bot.load_extension(f"cogs.modules.{cog}")
+        print(f"{cog} cog loaded")
+    print("cogs setup complete")
+
+
+async def connect_to_google_drive(guild):
+    await cogs_load()
+    drive_cog = bot.get_cog("GoogleDriveCog")
+    return await drive_cog.drive_connect(guild)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -84,8 +56,6 @@ TOKEN, GUILD, app_id = get_env_var()
 # ᕙ(`-´)ᕗ Global variables that are assigned when the google drive is connected
 drive = None
 http = None
-print(glob("**/cogs/modules/*.py"))
-cogs = [path.split("\\")[-1][:-3] for path in glob("cogs/modules/*.py")]
 
 
 # ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
@@ -101,15 +71,6 @@ async def on_ready():
     global drive, http
     drive, http = await connect_to_google_drive(guild)
     logging.warning("ready")
-    setup()
-
-
-def setup():
-    print(len(cogs))
-    for cog in cogs:
-        bot.load_extension(f"cogs.modules.{cog}")
-        print(f"{cog} cog loaded")
-    print("setup complete")
 
 
 # ᕙ(`-´)ᕗ When the bot is notified of a message, this is triggered
