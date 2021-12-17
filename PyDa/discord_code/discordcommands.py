@@ -5,11 +5,8 @@ Comment legend
 (ㆆ_ㆆ) - Bug
 """
 import asyncio
-import io
-import json
 import logging
 
-import requests
 import wikipedia as wp
 import wolframalpha as wa
 
@@ -17,7 +14,6 @@ import random
 
 import assets.dictionary as dictionary
 from discord.ext import tasks
-from pydrive2.auth import GoogleAuth
 
 
 # ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
@@ -204,14 +200,14 @@ async def drive_command(message, bot):
         file = await select_file(message, bot)
         addition_question = 'Please specify the text you want to add to the document'
         content_to_add = await get_question_response(addition_question, message, bot)
-        add_to_content(file, content_to_add.content)
+        await drive_cog.add_to_content(file, content_to_add.content)
         return await message.channel.send("add content method triggered")
 
     if message.content.lower().count("add image") >= 1:
         title_msg = await get_question_response(title_question, message, bot)
         content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
         path = content_msg.attachments[0].url
-        create_image_file(title_msg.content, path)
+        await drive_cog.create_image_file(title_msg.content, path)
         return await message.channel.send("The image was added to the drive")
 
 
@@ -262,44 +258,6 @@ def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the req
             return True
 
     return inner_check
-
-
-# ᕙ(`-´)ᕗ Upload a new image
-def create_image_file(title, content):
-    url = content  # Please set the direct link of the image file.
-    filename = title  # Please set the filename on Google Drive.
-    folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
-
-    # ᕙ(`-´)ᕗ To get these requests, LocalWebserverAuth has to be used
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
-    metadata = {
-        "name": filename,
-        "parents": [folder_id]
-    }
-    files = {
-        'data': ('metadata', json.dumps(metadata), 'application/json'),
-        'file': io.BytesIO(requests.get(url).content)
-    }
-    requests.post(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-        headers={"Authorization": "Bearer " + gauth.credentials.access_token},
-        files=files
-    )
-
-
-# ᕙ(`-´)ᕗ Change the title of an existing file
-def change_title(file, newname):
-    file.FetchMetadata(fields="title")
-    file['title'] = newname  # Change title of the file
-    file.Upload()  # Files.patch()
-
-
-# ᕙ(`-´)ᕗ Add some content to an existing file
-def add_to_content(file, content_to_add):
-    content = file.GetContentString()  # 'Hello'
-    file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
-    file.Upload()
 
 
 # ᕙ(`-´)ᕗ Send something but need a response to continue

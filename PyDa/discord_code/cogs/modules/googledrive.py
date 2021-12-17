@@ -1,6 +1,9 @@
+import json
 import logging
+import io
 
 from discord.ext import commands
+import requests
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
@@ -73,38 +76,49 @@ class GoogleDriveCog(commands.Cog):
         file.SetContentString(content)
         file.Upload()
 
+    # ᕙ(`-´)ᕗ Change the title of an existing file
     @commands.command()
     async def change_title(self, file, newname):
         file.FetchMetadata(fields="title")
         file['title'] = newname  # Change title of the file
         file.Upload()  # Files.patch()
 
+    # ᕙ(`-´)ᕗ Add some content to an existing file
+    @commands.command()
+    async def add_to_content(self, file, content_to_add):
+        content = file.GetContentString()  # 'Hello'
+        file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
+        file.Upload()
+
+    # ᕙ(`-´)ᕗ Upload a new image
+    @commands.command()
+    async def create_image_file(self, title, content):
+        url = content  # Please set the direct link of the image file.
+        filename = title  # Please set the filename on Google Drive.
+        folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
+
+        # ᕙ(`-´)ᕗ To get these requests, LocalWebserverAuth has to be used
+        gauth = GoogleAuth()
+        gauth.LocalWebserverAuth()
+        metadata = {
+            "name": filename,
+            "parents": [folder_id]
+        }
+        files = {
+            'data': ('metadata', json.dumps(metadata), 'application/json'),
+            'file': io.BytesIO(requests.get(url).content)
+        }
+        requests.post(
+            "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+            headers={"Authorization": "Bearer " + gauth.credentials.access_token},
+            files=files
+        )
+
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.wait_until_ready()
         print(" GoogleDriveCog ready")
 
-
-# if message.content.lower().count("change name") >= 1:
-#     await drive_inventory(message)
-#     file = await select_file(message, bot)
-#     title_msg = await get_question_response(title_question, message, bot)
-#     change_title(file, title_msg.content)
-#     return await message.channel.send("Title was changed to: " + file["title"])
-#
-# if message.content.lower().count("append") >= 1:
-#     file = await select_file(message, bot)
-#     addition_question = 'Please specify the text you want to add to the document'
-#     content_to_add = await get_question_response(addition_question, message, bot)
-#     add_to_content(file, content_to_add.content)
-#     return await message.channel.send("add content method triggered")
-#
-# if message.content.lower().count("add image") >= 1:
-#     title_msg = await get_question_response(title_question, message, bot)
-#     content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
-#     path = content_msg.attachments[0].url
-#     create_image_file(title_msg.content, path)
-#     return await message.channel.send("The image was added to the drive")
 
 def setup(bot):
     bot.add_cog(GoogleDriveCog(bot))
