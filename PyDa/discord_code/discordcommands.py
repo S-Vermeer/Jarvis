@@ -197,27 +197,29 @@ async def drive_command(message, bot):
         return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
+        await drive_cog.drive_inventory(message)
         file = await select_file(message, bot)
         addition_question = 'Please specify the text you want to add to the document'
         content_to_add = await get_question_response(addition_question, message, bot)
         await drive_cog.add_to_content(file, content_to_add.content)
         return await message.channel.send("add content method triggered")
 
-    if message.content.lower().count("add image") >= 1:
-        title_msg = await get_question_response(title_question, message, bot)
-        content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
-        path = content_msg.attachments[0].url
-        await drive_cog.create_image_file(title_msg.content, path)
-        return await message.channel.send("The image was added to the drive")
+    # (ㆆ_ㆆ) Doesnt work in server due to not opening in browser
+    # if message.content.lower().count("add image") >= 1:
+    #     title_msg = await get_question_response(title_question, message, bot)
+    #     content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
+    #     path = content_msg.attachments[0].url
+    #     await drive_cog.create_image_file(title_msg.content, path)
+    #     return await message.channel.send("The image was added to the drive")
 
 
 # ᕙ(`-´)ᕗ Search the internet for a response on the inputted query
 def search_internet(input_query, app_id):
     client = connect_wa(app_id)
     no_results = "No results"
-    try:  # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
+    try:  # ᕙ(`-´)ᕗ Try to get results for both Wiki and Wolfram
         res = client.query(input_query)
-        wolfram_res = next(res.results).text  # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+        wolfram_res = next(res.results).text  # ᕙ(`-´)ᕗ print top wolframalpha results of input
 
         wiki_res = wp.summary(input_query, sentences=2)
         answer_wa = "Wolfram Result: " + wolfram_res
@@ -226,10 +228,10 @@ def search_internet(input_query, app_id):
         return answer
 
     except (wp.exceptions.DisambiguationError, wp.exceptions.PageError,
-            wp.exceptions.WikipediaException):  # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
+            wp.exceptions.WikipediaException):  # ᕙ(`-´)ᕗ Get only wolfram if wiki throws exceptions
         try:
             res = client.query(input_query)
-            wolfram_res = next(res.results).text  # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+            wolfram_res = next(res.results).text  # ᕙ(`-´)ᕗ print top wolframalpha results of input
             return [wolfram_res]
 
         except (StopIteration, AttributeError):
@@ -242,10 +244,10 @@ def search_internet(input_query, app_id):
 
     except (
             StopIteration,
-            AttributeError):  # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
+            AttributeError):  # ᕙ(`-´)ᕗ And if wolfram also doesnt work, say that no results were found
         return [no_results]
 
-    except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
+    except BaseException as e:  # ᕙ(`-´)ᕗ All the attributes inside your window.
         logging.exception('error while accessing the searches that couldn\'t be specified ' + repr(e))
         return no_results
 
