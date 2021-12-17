@@ -181,23 +181,23 @@ async def select_file(message, bot):
 
 # ᕙ(`-´)ᕗ Select one of the drive commands
 async def drive_command(message, bot):
-
+    drive_cog = bot.get_cog("GoogleDriveCog")
     if message.content.lower().count("inventory") >= 1:
-        await drive_inventory(message)
+        await drive_cog.drive_inventory(message)
 
     title_question = 'Please specify the title for the document'
 
     if message.content.lower().count("create") >= 1:
         title_msg = await get_question_response(title_question, message, bot)
         content_msg = await get_question_response('Please specify the content for the document', title_msg, bot)
-        create_file(title_msg.content, content_msg.content)
+        await drive_cog.create_file(title_msg.content, content_msg.content)
         return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
 
     if message.content.lower().count("change name") >= 1:
-        await drive_inventory(message)
+        await drive_cog.drive_inventory(message)
         file = await select_file(message, bot)
         title_msg = await get_question_response(title_question, message, bot)
-        change_title(file, title_msg.content)
+        await drive_cog.change_title(file, title_msg.content)
         return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
@@ -262,28 +262,6 @@ def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the req
             return True
 
     return inner_check
-
-
-# ᕙ(`-´)ᕗ Displays the files from the drive
-async def drive_inventory(message):
-    # ᕙ(`-´)ᕗ View all folders and file in your Google Drive
-    file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-    flag = False
-    list_msg = ""
-    for file in file_list:
-        list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
-        flag = True
-    if flag:
-        await message.channel.send(list_msg)
-    if not flag:
-        message.channel.send('Sorry! no file found...')
-
-
-# ᕙ(`-´)ᕗ Make a new file and upload it to the drive
-def create_file(title, content):
-    file = drive.CreateFile({'title': title})
-    file.SetContentString(content)
-    file.Upload()
 
 
 # ᕙ(`-´)ᕗ Upload a new image

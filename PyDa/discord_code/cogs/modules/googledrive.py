@@ -8,8 +8,11 @@ import discordcommands
 
 
 class GoogleDriveCog(commands.Cog):
+    title_question = 'Please specify the title for the document'
+
     def __init__(self, bot):
         self.bot = bot
+        self.drive = None
 
     @commands.command()
     async def drive_connect(self, guild):
@@ -46,13 +49,62 @@ class GoogleDriveCog(commands.Cog):
 
         # ᕙ(`-´)ᕗ Create httplib.Http() object.
         http_obj = gdrive.auth.Get_Http_Object()
+        self.drive = gdrive
         return gdrive, http_obj
+
+    # ᕙ(`-´)ᕗ Displays the files from the drive
+    @commands.command()
+    async def drive_inventory(self, message):
+        file_list = self.drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+        flag = False
+        list_msg = ""
+        for file in file_list:
+            list_msg += '```Title: %s, ID: %s, mimeType: %s ```' % (file['title'], file['id'], file['mimeType'])
+            flag = True
+        if flag:
+            await message.channel.send(list_msg)
+        if not flag:
+            message.channel.send('Sorry! no file found...')
+
+    # ᕙ(`-´)ᕗ Make a new file and upload it to the drive
+    @commands.command()
+    async def create_file(self, title, content):
+        file = self.drive.CreateFile({'title': title})
+        file.SetContentString(content)
+        file.Upload()
+
+    @commands.command()
+    async def change_title(self, file, newname):
+        file.FetchMetadata(fields="title")
+        file['title'] = newname  # Change title of the file
+        file.Upload()  # Files.patch()
 
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.wait_until_ready()
         print(" GoogleDriveCog ready")
 
+
+# if message.content.lower().count("change name") >= 1:
+#     await drive_inventory(message)
+#     file = await select_file(message, bot)
+#     title_msg = await get_question_response(title_question, message, bot)
+#     change_title(file, title_msg.content)
+#     return await message.channel.send("Title was changed to: " + file["title"])
+#
+# if message.content.lower().count("append") >= 1:
+#     file = await select_file(message, bot)
+#     addition_question = 'Please specify the text you want to add to the document'
+#     content_to_add = await get_question_response(addition_question, message, bot)
+#     add_to_content(file, content_to_add.content)
+#     return await message.channel.send("add content method triggered")
+#
+# if message.content.lower().count("add image") >= 1:
+#     title_msg = await get_question_response(title_question, message, bot)
+#     content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
+#     path = content_msg.attachments[0].url
+#     create_image_file(title_msg.content, path)
+#     return await message.channel.send("The image was added to the drive")
 
 def setup(bot):
     bot.add_cog(GoogleDriveCog(bot))

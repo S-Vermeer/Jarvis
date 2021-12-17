@@ -85,7 +85,6 @@ async def on_message(message):
         if message.author == bot.user:
             return
         # ᕙ(`-´)ᕗ See whether one of the bots names was called
-        logging.warning(drive)
         await discordcommands.calling_command(message, bot, app_id, drive, http)
 
         # ᕙ(`-´)ᕗ These are various options that work without having to say the name first
