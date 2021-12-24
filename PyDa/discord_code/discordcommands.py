@@ -5,11 +5,8 @@ Comment legend
 (ㆆ_ㆆ) - Bug
 """
 import asyncio
-import io
-import json
 import logging
 
-import requests
 import wikipedia as wp
 import wolframalpha as wa
 
@@ -17,13 +14,12 @@ import random
 
 import assets.dictionary as dictionary
 from discord.ext import tasks
-from pydrive2.auth import GoogleAuth
 
 
 # ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
-async def dm_member_wait_for_response(member, message, client):
+async def dm_member_wait_for_response(member, message, bot):
     await dm_member(member, message)
-    msg = await client.wait_for('message', check=check(member), timeout=60)
+    msg = await bot.wait_for('message', check=check(member), timeout=60)
 
     return msg
 
@@ -41,12 +37,12 @@ def connect_wa(app_id):
 
 
 # ᕙ(`-´)ᕗ Check which action is asked for after phillip is called
-async def search_method(msg, message, app_id, client):
+async def search_method(msg, message, app_id, bot):
     if msg.content.lower().count("how are you") >= 1:
         return wellbeing(message)
 
     if msg.content.lower().count("search") >= 1:
-        return search_answer(message, msg, app_id, client)
+        return search_answer(message, msg, app_id, bot)
 
     if msg.content.lower().count("sleep") >= 1:
         return sleep_helper(msg)
@@ -58,7 +54,7 @@ async def search_method(msg, message, app_id, client):
         return jesse_hype(msg)
 
     if msg.content.lower().count("drive") >= 1:
-        return drive_command(msg, client)
+        return drive_command(msg, bot)
 
     if msg.content.lower().count("morning") >= 1:
         return good_morning(msg.guild)
@@ -73,7 +69,7 @@ http = None
 
 
 # ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
-async def calling_command(message, client, app_id, currentdrive, currenthttp):
+async def calling_command(message, bot, app_id, currentdrive, currenthttp):
     global drive
     global http
     drive = currentdrive
@@ -97,12 +93,12 @@ async def calling_command(message, client, app_id, currentdrive, currenthttp):
 
                     return inner_check
 
-                msg = await client.wait_for('message', check=check_author(message.author), timeout=15)
-                method = await search_method(msg, message, app_id, client)
+                msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
+                method = await search_method(msg, message, app_id, bot)
                 await method
 
             except asyncio.exceptions.TimeoutError as e:
-                await message.remove_reaction('👍', client.user)
+                await message.remove_reaction('👍', bot.user)
                 logging.warning("warning: " + repr(e))
 
 
@@ -152,7 +148,7 @@ async def jesse_hype(message):
 
 
 # ᕙ(`-´)ᕗ Search for the answer of a question on wikipedia and wolframalpha
-async def search_answer(message, msg, app_id, client):
+async def search_answer(message, msg, app_id, bot):
     answer = search_internet(msg.content, app_id)
 
     msg = await message.channel.send(answer[0])
@@ -161,67 +157,75 @@ async def search_answer(message, msg, app_id, client):
     if len(answer) > 1:
         await msg.add_reaction('👍')
 
-        @client.event
+        @bot.event
         async def on_reaction_add(reaction, user):
-            if reaction.emoji == '👍' and user.id != client.user.id:
+            if reaction.emoji == '👍' and user.id != bot.user.id:
                 await message.channel.send(answer[1])
 
 
 # ᕙ(`-´)ᕗ Send a question and return the result
-async def get_question_response(question, message, client):
+async def get_question_response(question, message, bot):
     await message.channel.send(question)
-    return await wait_for_response_message_drive(message, client)
+    return await wait_for_response_message_drive(message, bot)
 
 
 # ᕙ(`-´)ᕗ Select a file based on the specified id. 'Creating' only replicates it, if it isn't uploaded, nothing happens/
-async def select_file(message, client):
-    file_id = await get_question_response('Please specify the id of the document to change', message, client)
+async def select_file(message, bot):
+    file_id = await get_question_response('Please specify the id of the document to change', message, bot)
     return drive.CreateFile({'id': file_id.content})
 
 
 # ᕙ(`-´)ᕗ Select one of the drive commands
-async def drive_command(message, client):
-
+async def drive_command(message, bot):
+    drive_cog = bot.get_cog("GoogleDriveCog")
     if message.content.lower().count("inventory") >= 1:
-        await drive_inventory(message)
+        await drive_cog.drive_inventory(message)
 
     title_question = 'Please specify the title for the document'
 
     if message.content.lower().count("create") >= 1:
-        title_msg = await get_question_response(title_question, message, client)
-        content_msg = await get_question_response('Please specify the content for the document', title_msg, client)
-        create_file(title_msg.content, content_msg.content)
+        title_msg = await get_question_response(title_question, message, bot)
+        content_msg = await get_question_response('Please specify the content for the document', title_msg, bot)
+        await drive_cog.create_file(title_msg.content, content_msg.content)
         return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
 
     if message.content.lower().count("change name") >= 1:
-        await drive_inventory(message)
-        file = await select_file(message, client)
-        title_msg = await get_question_response(title_question, message, client)
-        change_title(file, title_msg.content)
+        await drive_cog.drive_inventory(message)
+        file = await select_file(message, bot)
+        title_msg = await get_question_response(title_question, message, bot)
+        await drive_cog.change_title(file, title_msg.content)
         return await message.channel.send("Title was changed to: " + file["title"])
 
     if message.content.lower().count("append") >= 1:
-        file = await select_file(message, client)
+        await drive_cog.drive_inventory(message)
+        file = await select_file(message, bot)
         addition_question = 'Please specify the text you want to add to the document'
-        content_to_add = await get_question_response(addition_question, message, client)
-        add_to_content(file, content_to_add.content)
-        return await message.channel.send("add content method triggered")
+        content_to_add = await get_question_response(addition_question, message, bot)
+        await drive_cog.add_to_content(file, content_to_add.content)
+        return await message.channel.send(content_to_add.content + " was added to " + file["title"])
 
-    if message.content.lower().count("add image") >= 1:
-        title_msg = await get_question_response(title_question, message, client)
-        content_msg = await get_question_response('Please upload the image(s)', title_msg, client)
-        path = content_msg.attachments[0].url
-        create_image_file(title_msg.content, path)
-        return await message.channel.send("The image was added to the drive")
+    if message.content.lower().count("show") >= 1:
+        await drive_cog.drive_inventory(message)
+        file = await select_file(message,bot)
+        content = await drive_cog.show_file_content(file)
+        return await message.channel.send(file["title"] + ": \n " + content)
+
+    # (ㆆ_ㆆ) Doesnt work in server due to not opening in browser
+    # if message.content.lower().count("add image") >= 1:
+    #     title_msg = await get_question_response(title_question, message, bot)
+    #     content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
+    #     path = content_msg.attachments[0].url
+    #     await drive_cog.create_image_file(title_msg.content, path)
+    #     return await message.channel.send("The image was added to the drive")
 
 
 # ᕙ(`-´)ᕗ Search the internet for a response on the inputted query
 def search_internet(input_query, app_id):
     client = connect_wa(app_id)
     no_results = "No results"
-    try:  # ᕙ(`▿´)ᕗ Try to get results for both Wiki and Wolframᕙ(`▿´)ᕗ
+    try:  # ᕙ(`-´)ᕗ Try to get results for both Wiki and Wolfram
         res = client.query(input_query)
-        wolfram_res = next(res.results).text  # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+        wolfram_res = next(res.results).text  # ᕙ(`-´)ᕗ print top wolframalpha results of input
 
         wiki_res = wp.summary(input_query, sentences=2)
         answer_wa = "Wolfram Result: " + wolfram_res
@@ -230,10 +234,10 @@ def search_internet(input_query, app_id):
         return answer
 
     except (wp.exceptions.DisambiguationError, wp.exceptions.PageError,
-            wp.exceptions.WikipediaException):  # ᕙ(`▿´)ᕗ Get only wolfram if wiki throws exceptions ᕙ(`▿´)ᕗ
+            wp.exceptions.WikipediaException):  # ᕙ(`-´)ᕗ Get only wolfram if wiki throws exceptions
         try:
             res = client.query(input_query)
-            wolfram_res = next(res.results).text  # ᕙ(`▿´)ᕗ print top wolframalpha results of inputᕙ(`▿´)ᕗ
+            wolfram_res = next(res.results).text  # ᕙ(`-´)ᕗ print top wolframalpha results of input
             return [wolfram_res]
 
         except (StopIteration, AttributeError):
@@ -246,10 +250,10 @@ def search_internet(input_query, app_id):
 
     except (
             StopIteration,
-            AttributeError):  # ᕙ(`▿´)ᕗ And if wolfram also doesnt work, say that no results were foundᕙ(`▿´)ᕗ
+            AttributeError):  # ᕙ(`-´)ᕗ And if wolfram also doesnt work, say that no results were found
         return [no_results]
 
-    except BaseException as e:  # ᕙ(`▿´)ᕗ All the attributes inside your window. ᕙ(`▿´)ᕗ
+    except BaseException as e:  # ᕙ(`-´)ᕗ All the attributes inside your window.
         logging.exception('error while accessing the searches that couldn\'t be specified ' + repr(e))
         return no_results
 
@@ -264,68 +268,8 @@ def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the req
     return inner_check
 
 
-# ᕙ(`-´)ᕗ Displays the files from the drive
-async def drive_inventory(message):
-    # ᕙ(`-´)ᕗ View all folders and file in your Google Drive
-    file_list = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-    flag = False
-    list_msg = ""
-    for file in file_list:
-        list_msg += 'Title: %s, ID: %s, mimeType: %s \n' % (file['title'], file['id'], file['mimeType'])
-        flag = True
-    if flag:
-        await message.channel.send(list_msg)
-    if not flag:
-        message.channel.send('Sorry! no file found...')
-
-
-# ᕙ(`-´)ᕗ Make a new file and upload it to the drive
-def create_file(title, content):
-    file = drive.CreateFile({'title': title})
-    file.SetContentString(content)
-    file.Upload()
-
-
-# ᕙ(`-´)ᕗ Upload a new image
-def create_image_file(title, content):
-    url = content  # Please set the direct link of the image file.
-    filename = title  # Please set the filename on Google Drive.
-    folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
-
-    # ᕙ(`-´)ᕗ To get these requests, LocalWebserverAuth has to be used
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
-    metadata = {
-        "name": filename,
-        "parents": [folder_id]
-    }
-    files = {
-        'data': ('metadata', json.dumps(metadata), 'application/json'),
-        'file': io.BytesIO(requests.get(url).content)
-    }
-    requests.post(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
-        headers={"Authorization": "Bearer " + gauth.credentials.access_token},
-        files=files
-    )
-
-
-# ᕙ(`-´)ᕗ Change the title of an existing file
-def change_title(file, newname):
-    file.FetchMetadata(fields="title")
-    file['title'] = newname  # Change title of the file
-    file.Upload()  # Files.patch()
-
-
-# ᕙ(`-´)ᕗ Add some content to an existing file
-def add_to_content(file, content_to_add):
-    content = file.GetContentString()  # 'Hello'
-    file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
-    file.Upload()
-
-
 # ᕙ(`-´)ᕗ Send something but need a response to continue
-async def require_response(message, client, app_id):
+async def require_response(message, bot, app_id):
     try:
         await message.add_reaction('👍')
 
@@ -339,12 +283,12 @@ async def require_response(message, client, app_id):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=author_check(message.author), timeout=15)
-        method = await search_method(msg, message, app_id, client)
+        msg = await bot.wait_for('message', check=author_check(message.author), timeout=15)
+        method = await search_method(msg, message, app_id, bot)
         await method
 
     except Exception as e:
-        await message.remove_reaction('👍', client.user)
+        await message.remove_reaction('👍', bot.user)
         logging.warning(repr(e))
 
 
@@ -391,7 +335,7 @@ async def before_printer(self):
 
 
 # ᕙ(`-´)ᕗ Wai for a response, specifically for the drive
-async def wait_for_response_message_drive(message, client):
+async def wait_for_response_message_drive(message, bot):
     try:
         await message.add_reaction('👍')
 
@@ -406,9 +350,9 @@ async def wait_for_response_message_drive(message, client):
 
             return inner_check
 
-        msg = await client.wait_for('message', check=check_author(message.author), timeout=15)
+        msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
         return msg
 
     except Exception as e:
-        await message.remove_reaction('👍', client.user)
+        await message.remove_reaction('👍', bot.user)
         logging.warning(repr(e))

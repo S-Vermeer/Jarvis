@@ -11,59 +11,34 @@ import random
 import logging
 
 import discord
+from discord.ext import commands
+from discord.ext.commands import bot
 
 from dotenv import load_dotenv
 
 import discordcommands
 import assets.dictionary as dictionary
 
-from pydrive2.auth import GoogleAuth
-from pydrive2.drive import GoogleDrive
-
-
-async def connect_to_google_drive(guild):
-    # ᕙ(`-´)ᕗ Change file path for settings file (hidden in github)
-    GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
-    gauth = GoogleAuth()
-
-    gauth.LoadCredentialsFile("credentials/mycreds.txt")  # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
-    if gauth.credentials is None:
-        # ᕙ(`-´)ᕗ Get the url that the user must use to give access to google drive
-        auth_url = gauth.GetAuthUrl()
-
-        uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
-
-        skyler = guild.get_member(uid)
-        msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, client)
-
-        logging.warning(msg.content)
-        gauth.Auth(msg.content)
-
-        logging.warning("Authorisation complete")
-    elif gauth.access_token_expired:
-        # ᕙ(`-´)ᕗ Refresh them if expired
-        # (ㆆ_ㆆ) Does not Refresh yet?
-        open('credentials/mycreds.txt', 'w').close()
-        logging.warning("refresh")
-    else:
-        # ᕙ(`-´)ᕗ Initialize the saved creds
-        gauth.Authorize()
-        logging.warning("used saved creds")
-    # ᕙ(`-´)ᕗ Save the current credentials to a file
-    gauth.SaveCredentialsFile("credentials/mycreds.txt")
-
-    gdrive = GoogleDrive(gauth)
-
-    # ᕙ(`-´)ᕗ Create httplib.Http() object.
-    http_obj = gdrive.auth.Get_Http_Object()
-    return gdrive, http_obj
-
 # ᕙ(`-´)ᕗ Discord.py requires intents to open the relevant gateways to make sure only the events you need get triggered.
 intents = discord.Intents.default()
 intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the members
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
-client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix="", intents=intents)
+cog_names = ["googledrive"]
+
+
+async def cogs_load():
+    for cog in cog_names:
+        bot.load_extension(f"cogs.modules.{cog}")
+        print(f"{cog} cog loaded")
+    print("cogs setup complete")
+
+
+async def connect_to_google_drive(guild):
+    await cogs_load()
+    drive_cog = bot.get_cog("GoogleDriveCog")
+    return await drive_cog.drive_connect(guild)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -84,12 +59,12 @@ http = None
 
 
 # ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
-@client.event
+@bot.event
 async def on_ready():
     # ᕙ(`-´)ᕗ from all the guilds that the bot is connected to, assign to guild the one that has the name from the .env
-    guild = discord.utils.get(client.guilds, name=GUILD)
+    guild = discord.utils.get(bot.guilds, name=GUILD)
     logging.warning(
-        f'{client.user} is connected to the following guild:\n'
+        f'{bot.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
     logging.warning("There are " + str(len(guild.members)) + " guild members")
@@ -99,7 +74,7 @@ async def on_ready():
 
 
 # ᕙ(`-´)ᕗ When the bot is notified of a message, this is triggered
-@client.event
+@bot.event
 async def on_message(message):
     if message.guild is None:
         return
@@ -107,10 +82,10 @@ async def on_message(message):
     # this is enacted
     if GUILD == message.guild.name:
         # ᕙ(`-´)ᕗ if the message was from the bot, don't do anything
-        if message.author == client.user:
+        if message.author == bot.user:
             return
         # ᕙ(`-´)ᕗ See whether one of the bots names was called
-        await discordcommands.calling_command(message, client, app_id, drive, http)
+        await discordcommands.calling_command(message, bot, app_id, drive, http)
 
         # ᕙ(`-´)ᕗ These are various options that work without having to say the name first
         await stop(message)
@@ -121,13 +96,13 @@ async def on_message(message):
 
 
 # ᕙ(`-´)ᕗ If a reaction is added to a message since the bot started listening, this is triggered.
-@client.event
+@bot.event
 async def on_reaction_add(reaction, user):
     if reaction.message.guild is None:
         return
     # ᕙ(`-´)ᕗ If the guild is correct, it is not sent by the bot, the reaction is an emoji with a monocle and there
     # is at least one / in the message, this is triggered
-    if GUILD == reaction.message.guild.name and user != client.user and \
+    if GUILD == reaction.message.guild.name and user != bot.user and \
             reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
         # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
         response = "You requested tone tag information about: " + reaction.message.content + "\n"
@@ -140,7 +115,7 @@ async def stop(message):
     # ᕙ(`-´)ᕗ The message has to be solely stop, so it when it is said in a sentence it isn't triggered
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
-        await client.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
+        await bot.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
 
 
 # ᕙ(`-´)ᕗ The bot responds with a list of names that they listen to for more advanced requests
@@ -202,4 +177,4 @@ def check(author):
     return inner_check
 
 
-client.run(TOKEN)
+bot.run(TOKEN)
