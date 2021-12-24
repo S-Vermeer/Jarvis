@@ -187,14 +187,14 @@ async def drive_command(message, bot):
         title_msg = await get_question_response(title_question, message, bot)
         content_msg = await get_question_response('Please specify the content for the document', title_msg, bot)
         await drive_cog.create_file(title_msg.content, content_msg.content)
-        return await message.channel.send("Title: " + title_msg.content + "\n Content: " + content_msg.content)
+        return await message.channel.send(f"Title: { title_msg.content } \n Content: { content_msg.content }")
 
     if message.content.lower().count("change name") >= 1:
         await drive_cog.drive_inventory(message)
         file = await select_file(message, bot)
         title_msg = await get_question_response(title_question, message, bot)
         await drive_cog.change_title(file, title_msg.content)
-        return await message.channel.send("Title was changed to: " + file["title"])
+        return await message.channel.send(f"Title was changed to: {file['title']}")
 
     if message.content.lower().count("append") >= 1:
         await drive_cog.drive_inventory(message)
@@ -202,13 +202,13 @@ async def drive_command(message, bot):
         addition_question = 'Please specify the text you want to add to the document'
         content_to_add = await get_question_response(addition_question, message, bot)
         await drive_cog.add_to_content(file, content_to_add.content)
-        return await message.channel.send(content_to_add.content + " was added to " + file["title"])
+        return await message.channel.send(f"{ content_to_add.content } was added to { file['title'] }")
 
     if message.content.lower().count("show") >= 1:
         await drive_cog.drive_inventory(message)
         file = await select_file(message,bot)
         content = await drive_cog.show_file_content(file)
-        return await message.channel.send(file["title"] + ": \n " + content)
+        return await message.channel.send(f"{ file['title'] }: \n { content }")
 
     # (ㆆ_ㆆ) Doesnt work in server due to not opening in browser
     # if message.content.lower().count("add image") >= 1:
@@ -228,8 +228,8 @@ def search_internet(input_query, app_id):
         wolfram_res = next(res.results).text  # ᕙ(`-´)ᕗ print top wolframalpha results of input
 
         wiki_res = wp.summary(input_query, sentences=2)
-        answer_wa = "Wolfram Result: " + wolfram_res
-        answer_wp = "Wikipedia Result: " + wiki_res
+        answer_wa = f"Wolfram Result: { wolfram_res }"
+        answer_wp = f"Wikipedia Result: { wiki_res }"
         answer = [answer_wa, answer_wp]
         return answer
 
@@ -245,7 +245,7 @@ def search_internet(input_query, app_id):
                 wiki_res = wp.summary(input_query, sentences=2)
                 return wiki_res
             except BaseException as e:
-                logging.exception('error while accessing the wiki summary: ' + repr(e))
+                logging.exception(f'error while accessing the wiki summary: { repr(e) }')
                 return no_results
 
     except (
@@ -254,7 +254,7 @@ def search_internet(input_query, app_id):
         return [no_results]
 
     except BaseException as e:  # ᕙ(`-´)ᕗ All the attributes inside your window.
-        logging.exception('error while accessing the searches that couldn\'t be specified ' + repr(e))
+        logging.exception(f'error while accessing the searches that couldn\'t be specified { repr(e) }')
         return no_results
 
 
@@ -317,7 +317,7 @@ async def tone_check(message):
     for msg in messages:
         for tone_tag in dictionary.tone_tags:
             if tone_tag[0].lower().count(split_message[msg]) >= 1:
-                response += tone_tag[0] + "  =  " + tone_tag[1] + "\n"
+                response += f"{ tone_tag[0] } = { tone_tag[1] } \n"
     return response
 
 

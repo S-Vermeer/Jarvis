@@ -63,7 +63,7 @@ class GoogleDriveCog(commands.Cog):
         flag = False
         list_msg = ""
         for file in file_list:
-            list_msg += '```Title: %s, ID: %s, mimeType: %s ```' % (file['title'], file['id'], file['mimeType'])
+            list_msg += f"```Title: { file['title'] }, ID: { file['id'] }, mimeType: { file['mimeType'] }```"
             flag = True
         if flag:
             await message.channel.send(list_msg)
@@ -74,8 +74,6 @@ class GoogleDriveCog(commands.Cog):
     @commands.command()
     async def create_file(self, title, content):
         file = self.drive.CreateFile({'title': title, 'parents': [{'id': f'{self.folder_id}'}]})
-        print("YOOOOO")
-        print(file.FetchMetadata)
         file.SetContentString(content)
         file.Upload()
 
@@ -90,7 +88,7 @@ class GoogleDriveCog(commands.Cog):
     @commands.command()
     async def add_to_content(self, file, content_to_add):
         content = file.GetContentString()  # 'Hello'
-        file.SetContentString(content + " " + content_to_add + "\n")  # 'Hello World!'
+        file.SetContentString(f"{ content } { content_to_add } \n")
         file.Upload()
 
     # ᕙ(`-´)ᕗ Upload a new image

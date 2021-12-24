@@ -67,7 +67,7 @@ async def on_ready():
         f'{bot.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
-    logging.warning("There are " + str(len(guild.members)) + " guild members")
+    logging.warning(f"There are { str(len(guild.members)) } guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
     logging.warning("ready")
@@ -105,7 +105,7 @@ async def on_reaction_add(reaction, user):
     if GUILD == reaction.message.guild.name and user != bot.user and \
             reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
         # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
-        response = "You requested tone tag information about: " + reaction.message.content + "\n"
+        response = f"You requested tone tag information about: { reaction.message.content } \n"
         response += await discordcommands.tone_check(reaction.message)
         await discordcommands.dm_member(user, response)
 
