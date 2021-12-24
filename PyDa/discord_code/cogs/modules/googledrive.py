@@ -16,6 +16,7 @@ class GoogleDriveCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.drive = None
+        self.folder_id = ''
 
     @commands.command()
     async def drive_connect(self, guild):
@@ -53,12 +54,12 @@ class GoogleDriveCog(commands.Cog):
         # ᕙ(`-´)ᕗ Create httplib.Http() object.
         http_obj = gdrive.auth.Get_Http_Object()
         self.drive = gdrive
+        await self.get_folder_id(guild)
         return gdrive, http_obj
 
-    # ᕙ(`-´)ᕗ Displays the files from the drive
     @commands.command()
     async def drive_inventory(self, message):
-        file_list = self.drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+        file_list = self.drive.ListFile({'q': "\'" + self.folder_id + "\' in parents and trashed=false"}).GetList()
         flag = False
         list_msg = ""
         for file in file_list:
@@ -72,7 +73,9 @@ class GoogleDriveCog(commands.Cog):
     # ᕙ(`-´)ᕗ Make a new file and upload it to the drive
     @commands.command()
     async def create_file(self, title, content):
-        file = self.drive.CreateFile({'title': title})
+        file = self.drive.CreateFile({'title': title, 'parents': [{'id': f'{self.folder_id}'}]})
+        print("YOOOOO")
+        print(file.FetchMetadata)
         file.SetContentString(content)
         file.Upload()
 
@@ -95,7 +98,7 @@ class GoogleDriveCog(commands.Cog):
     async def create_image_file(self, title, content):
         url = content  # Please set the direct link of the image file.
         filename = title  # Please set the filename on Google Drive.
-        folder_id = 'root'  # Please set the folder ID. The file is put to this folder.
+        folder_id = self.folder_id  # Please set the folder ID. The file is put to this folder.
 
         # ᕙ(`-´)ᕗ To get these requests, LocalWebserverAuth has to be used
         gauth = GoogleAuth()
@@ -118,6 +121,19 @@ class GoogleDriveCog(commands.Cog):
     async def on_ready(self):
         await self.bot.wait_until_ready()
         print(" GoogleDriveCog ready")
+
+    async def get_folder_id(self, guild):
+        file_list = self.drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+        for file in file_list:
+            if file['title'] == guild.name:
+                print(file['id'])
+                self.folder_id = file['id']
+                break
+
+    async def show_file_content(self, file):
+        content = file.GetContentString()  # 'Hello'
+        return content
+
 
 
 def setup(bot):

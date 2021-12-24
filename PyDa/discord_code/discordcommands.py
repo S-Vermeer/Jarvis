@@ -202,7 +202,13 @@ async def drive_command(message, bot):
         addition_question = 'Please specify the text you want to add to the document'
         content_to_add = await get_question_response(addition_question, message, bot)
         await drive_cog.add_to_content(file, content_to_add.content)
-        return await message.channel.send("add content method triggered")
+        return await message.channel.send(content_to_add.content + " was added to " + file["title"])
+
+    if message.content.lower().count("show") >= 1:
+        await drive_cog.drive_inventory(message)
+        file = await select_file(message,bot)
+        content = await drive_cog.show_file_content(file)
+        return await message.channel.send(file["title"] + ": \n " + content)
 
     # (ㆆ_ㆆ) Doesnt work in server due to not opening in browser
     # if message.content.lower().count("add image") >= 1:
