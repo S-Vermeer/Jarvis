@@ -121,10 +121,13 @@ async def stop(message):
 # ᕙ(`-´)ᕗ The bot responds with a list of names that they listen to for more advanced requests
 async def name_list(message):
     if message.content.lower() == 'names':
-        response = "Phillip responds to:\n"
+        introduction = "Phillip responds to:"
+        names = ""
         for name in dictionary.phillip_names:
-            response = response + name + "\n"
-        await message.channel.send(response)
+            names += name + "\n"
+
+        embed = discord.Embed(title=introduction, description=names, color=0xFF0000)
+        await message.channel.send(embed=embed)
 
 
 # ᕙ(`-´)ᕗ Easter egg from original development, sends a random brooklyn 99 quote
@@ -156,20 +159,23 @@ async def help_msg(message):
         for function in dictionary.on_call_functions:
             embed.add_field(name=function[0], value=function[1], inline=True)
 
-    await message.channel.send(embed=embed)
+        await message.channel.send(embed=embed)
 
 
 # ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
 async def tone_tags(message):
-    response = "tone tags / tone indicators are things you can include with text to indicate what the tone of it is. \n"
-    response += "some people have difficulty picking up on tone. communicating through text only makes this harder " \
-                "due to lack of audio and physical clues (voice inflection, body language, facial expressions, etc.) "
-    response += "Tagging what tone you are using can be very helpful for others understanding of what you're saying, " \
-                "clarification, avoiding miscommunications, etc. \n"
     if message.content.lower() == 'tonetags':
+        introduction = "tone tags / tone indicators are things you can include with text to indicate what the tone of "\
+                       "it is. Some people have difficulty picking up on tone. communicating through text only " \
+                       "makes this harder due to lack of audio and physical clues (voice inflection, body language, " \
+                       "facial expressions, etc.) Tagging what tone you are using can be very helpful for others " \
+                       "understanding of what you're saying, clarification, avoiding miscommunications, etc. \n "
+
+        embed = discord.Embed(title='Tone tags', description=introduction, color=0xFF0000)
+
         for tone_tag in dictionary.tone_tags:
-            response = response + tone_tag[0] + "  =  " + tone_tag[1] + "\n"
-        await message.channel.send(response)
+            embed.add_field(name=tone_tag[0], value=tone_tag[1], inline=True)
+        await message.channel.send(embed=embed)
 
 
 # ᕙ(`-´)ᕗ Check whether the message was sent by the requester
