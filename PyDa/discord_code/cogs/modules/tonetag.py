@@ -28,6 +28,24 @@ class ToneTagCog(commands.Cog):
 
         return embed
 
+    @commands.command()
+    async def specific_explanation(self, message):
+        split_message = message.content.split()
+        index_tag = -1
+        messages = []
+
+        for msg in split_message:
+            index_tag += 1
+            if msg.find("/") != -1:
+                messages.append(index_tag)
+
+        response = "The following tone tags are possible: \n"
+        for msg in messages:
+            for tone_tag in dictionary.tone_tags:
+                if tone_tag[0].lower().count(split_message[msg]) >= 1:
+                    response += f"{ tone_tag[0] } = { tone_tag[1] } \n"
+        return response
+
     @commands.Cog.listener()
     async def on_ready(self):
         await self.bot.wait_until_ready()

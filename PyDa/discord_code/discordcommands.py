@@ -60,9 +60,7 @@ async def search_method(msg, message, app_id, bot):
         return good_morning(msg.guild)
 
     if msg.content.lower().count("tone") and msg.content.lower().count("/") >= 1:
-        response = await tone_check(msg)
-        await msg.channel.send(response)
-        return tone_check(msg)
+        return tone_check(msg, bot)
 
 drive = None
 http = None
@@ -163,60 +161,10 @@ async def search_answer(message, msg, app_id, bot):
                 await message.channel.send(answer[1])
 
 
-# ᕙ(`-´)ᕗ Send a question and return the result
-async def get_question_response(question, message, bot):
-    await message.channel.send(question)
-    return await wait_for_response_message_drive(message, bot)
-
-
-# ᕙ(`-´)ᕗ Select a file based on the specified id. 'Creating' only replicates it, if it isn't uploaded, nothing happens/
-async def select_file(message, bot):
-    file_id = await get_question_response('Please specify the id of the document to change', message, bot)
-    return drive.CreateFile({'id': file_id.content})
-
-
 # ᕙ(`-´)ᕗ Select one of the drive commands
 async def drive_command(message, bot):
     drive_cog = bot.get_cog("GoogleDriveCog")
-    if message.content.lower().count("inventory") >= 1:
-        await drive_cog.drive_inventory(message)
-
-    title_question = 'Please specify the title for the document'
-
-    if message.content.lower().count("create") >= 1:
-        title_msg = await get_question_response(title_question, message, bot)
-        content_msg = await get_question_response('Please specify the content for the document', title_msg, bot)
-        await drive_cog.create_file(title_msg.content, content_msg.content)
-        return await message.channel.send(f"Title: { title_msg.content } \n Content: { content_msg.content }")
-
-    if message.content.lower().count("change name") >= 1:
-        await drive_cog.drive_inventory(message)
-        file = await select_file(message, bot)
-        title_msg = await get_question_response(title_question, message, bot)
-        await drive_cog.change_title(file, title_msg.content)
-        return await message.channel.send(f"Title was changed to: {file['title']}")
-
-    if message.content.lower().count("append") >= 1:
-        await drive_cog.drive_inventory(message)
-        file = await select_file(message, bot)
-        addition_question = 'Please specify the text you want to add to the document'
-        content_to_add = await get_question_response(addition_question, message, bot)
-        await drive_cog.add_to_content(file, content_to_add.content)
-        return await message.channel.send(f"{ content_to_add.content } was added to { file['title'] }")
-
-    if message.content.lower().count("show") >= 1:
-        await drive_cog.drive_inventory(message)
-        file = await select_file(message,bot)
-        content = await drive_cog.show_file_content(file)
-        return await message.channel.send(f"{ file['title'] }: \n { content }")
-
-    # (ㆆ_ㆆ) Doesnt work in server due to not opening in browser
-    # if message.content.lower().count("add image") >= 1:
-    #     title_msg = await get_question_response(title_question, message, bot)
-    #     content_msg = await get_question_response('Please upload the image(s)', title_msg, bot)
-    #     path = content_msg.attachments[0].url
-    #     await drive_cog.create_image_file(title_msg.content, path)
-    #     return await message.channel.send("The image was added to the drive")
+    await drive_cog.drive_functions(message)
 
 
 # ᕙ(`-´)ᕗ Search the internet for a response on the inputted query
@@ -303,22 +251,10 @@ async def good_morning(guild):
 
 
 # ᕙ(`-´)ᕗ Check the tone tags based on your own message
-async def tone_check(message):
-    split_message = message.content.split()
-    index_tag = -1
-    messages = []
-
-    for msg in split_message:
-        index_tag += 1
-        if msg.find("/") != -1:
-            messages.append(index_tag)
-
-    response = "The following tone tags are possible: \n"
-    for msg in messages:
-        for tone_tag in dictionary.tone_tags:
-            if tone_tag[0].lower().count(split_message[msg]) >= 1:
-                response += f"{ tone_tag[0] } = { tone_tag[1] } \n"
-    return response
+async def tone_check(message, bot):
+    tonetagcog = bot.get_cog("ToneTagCog")
+    response = await tonetagcog.specific_explanation(message)
+    await message.channel.send(response)
 
 
 # ᕙ(`-´)ᕗ Attempt to start a task every x amount of time
@@ -332,27 +268,3 @@ async def called_every_five_min():
 async def before_printer(self):
     logging.warning('waiting...')
     await self.bot.wait_until_ready()
-
-
-# ᕙ(`-´)ᕗ Wai for a response, specifically for the drive
-async def wait_for_response_message_drive(message, bot):
-    try:
-        await message.add_reaction('👍')
-
-        def check_author(author):
-
-            def inner_check(message_to_check):
-                if message_to_check.author != author:
-                    logging.warning("author doesn't match")
-                    return False
-                else:
-                    return True
-
-            return inner_check
-
-        msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
-        return msg
-
-    except Exception as e:
-        await message.remove_reaction('👍', bot.user)
-        logging.warning(repr(e))

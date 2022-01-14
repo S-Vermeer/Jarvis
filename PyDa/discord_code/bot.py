@@ -25,7 +25,7 @@ intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the memb
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
-cog_names = ["googledrive", "tonetag"]
+cog_names = ["googledrive", "tonetag", "usercommunication"]
 
 
 async def cogs_load():
@@ -35,10 +35,9 @@ async def cogs_load():
     print("cogs setup complete")
 
 
-async def connect_to_google_drive(guild):
-    await cogs_load()
+async def connect_to_google_drive(guild, communication):
     drive_cog = bot.get_cog("GoogleDriveCog")
-    return await drive_cog.drive_connect(guild)
+    return await drive_cog.drive_connect(guild, communication)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -68,8 +67,10 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})\n'
     )
     logging.warning(f"There are {str(len(guild.members))} guild members")
+    await cogs_load()
+    communication_cog = bot.get_cog("UserCommunicationCog")
     global drive, http
-    drive, http = await connect_to_google_drive(guild)
+    drive, http = await connect_to_google_drive(guild, communication_cog)
     logging.warning("ready")
 
 
