@@ -13,14 +13,13 @@ class UserCommunicationCog(commands.Cog):
         await message.channel.send(question)
         return await self.wait_for_response_message_drive(message)
 
-# ᕙ(`-´)ᕗ Wait for a response, specifically for the drive
+    # ᕙ(`-´)ᕗ Wait for a response, specifically for the drive
     @commands.command()
     async def wait_for_response_message_drive(self, message):
         try:
             await message.add_reaction('👍')
 
             def check_author(author):
-
                 def inner_check(message_to_check):
                     if message_to_check.author != author:
                         logging.warning("author doesn't match")
@@ -37,7 +36,30 @@ class UserCommunicationCog(commands.Cog):
             await message.remove_reaction('👍', self.bot.user)
             logging.warning(repr(e))
 
+    # ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
+    @commands.command()
+    async def dm_member_wait_for_response(self, member, message):
+        await self.dm_member(member, message)
+        msg = await self.bot.wait_for('message', check=check(member), timeout=60)
+        return msg
+
+    # ᕙ(`-´)ᕗ Send a direct message to a member
+    @commands.command()
+    async def dm_member(self, member, message):
+        await member.create_dm()
+        await member.dm_channel.send(message)
+
 
 def setup(bot):
     bot.add_cog(UserCommunicationCog(bot))
     print("  UserCommunicationCog added")
+
+
+def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the requester
+    def inner_check(message):
+        if message.author != author or message.channel != author.dm_channel:
+            return False
+        else:
+            return True
+
+    return inner_check

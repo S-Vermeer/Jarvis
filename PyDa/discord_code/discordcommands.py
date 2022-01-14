@@ -16,20 +16,6 @@ import assets.dictionary as dictionary
 from discord.ext import tasks
 
 
-# ᕙ(`-´)ᕗ Send a direct message to a member and wait 60 seconds for a response
-async def dm_member_wait_for_response(member, message, bot):
-    await dm_member(member, message)
-    msg = await bot.wait_for('message', check=check(member), timeout=60)
-
-    return msg
-
-
-# ᕙ(`-´)ᕗ Send a direct message to a member
-async def dm_member(member, message):
-    await member.create_dm()
-    await member.dm_channel.send(message)
-
-
 # ᕙ(`-´)ᕗ Connect to the wolfram alpha client
 def connect_wa(app_id):
     client = wa.Client(app_id)
@@ -57,7 +43,8 @@ async def search_method(msg, message, app_id, bot):
         return drive_command(msg, bot)
 
     if msg.content.lower().count("morning") >= 1:
-        return good_morning(msg.guild)
+        com_cog = bot.get_cog("UserCommunicationCog")
+        return good_morning(msg.guild, com_cog)
 
     if msg.content.lower().count("tone") and msg.content.lower().count("/") >= 1:
         return tone_check(msg, bot)
@@ -206,16 +193,6 @@ def search_internet(input_query, app_id):
         return no_results
 
 
-def check(author):  # ᕙ(`-´)ᕗ check whether the message was sent by the requester
-    def inner_check(message):
-        if message.author != author or message.channel != author.dm_channel:
-            return False
-        else:
-            return True
-
-    return inner_check
-
-
 # ᕙ(`-´)ᕗ Send something but need a response to continue
 async def require_response(message, bot, app_id):
     try:
@@ -241,13 +218,12 @@ async def require_response(message, bot, app_id):
 
 
 # ᕙ(`-´)ᕗ Sends a good morning message to whoever requests it at a certain time
-async def good_morning(guild):
+async def good_morning(guild, com_cog):
     uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
     skyler = guild.get_member(uid)
     morning_message = "good morning test"
-    await called_every_five_min()
-    await dm_member(skyler, morning_message)
+    await com_cog.dm_member(skyler, morning_message)
 
 
 # ᕙ(`-´)ᕗ Check the tone tags based on your own message

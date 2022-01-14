@@ -9,8 +9,6 @@ from pydrive2.files import ApiRequestError
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
-import discordcommands
-
 
 class GoogleDriveCog(commands.Cog):
     title_question = 'Please specify the title for the document'
@@ -34,7 +32,7 @@ class GoogleDriveCog(commands.Cog):
             uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
             skyler = guild.get_member(uid)
-            msg = await discordcommands.dm_member_wait_for_response(skyler, auth_url, self.bot)
+            msg = await self.com_cog.dm_member_wait_for_response(skyler, auth_url, self.bot)
 
             logging.warning(msg.content)
             gauth.Auth(msg.content)
