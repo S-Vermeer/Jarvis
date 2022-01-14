@@ -25,7 +25,7 @@ intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the memb
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
-cog_names = ["googledrive"]
+cog_names = ["googledrive", "tonetag"]
 
 
 async def cogs_load():
@@ -95,21 +95,6 @@ async def on_message(message):
         await tone_tags(message)
 
 
-# ᕙ(`-´)ᕗ If a reaction is added to a message since the bot started listening, this is triggered.
-@bot.event
-async def on_reaction_add(reaction, user):
-    if reaction.message.guild is None:
-        return
-    # ᕙ(`-´)ᕗ If the guild is correct, it is not sent by the bot, the reaction is an emoji with a monocle and there
-    # is at least one / in the message, this is triggered
-    if GUILD == reaction.message.guild.name and user != bot.user and \
-            reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
-        # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
-        response = f"You requested tone tag information about: {reaction.message.content} \n"
-        response += await discordcommands.tone_check(reaction.message)
-        await discordcommands.dm_member(user, response)
-
-
 # ᕙ(`-´)ᕗ Phillip is shut down, when they are misbehaving
 async def stop(message):
     # ᕙ(`-´)ᕗ The message has to be solely stop, so it when it is said in a sentence it isn't triggered
@@ -165,16 +150,8 @@ async def help_msg(message):
 # ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
 async def tone_tags(message):
     if message.content.lower() == 'tonetags':
-        introduction = "tone tags / tone indicators are things you can include with text to indicate what the tone of "\
-                       "it is. Some people have difficulty picking up on tone. communicating through text only " \
-                       "makes this harder due to lack of audio and physical clues (voice inflection, body language, " \
-                       "facial expressions, etc.) Tagging what tone you are using can be very helpful for others " \
-                       "understanding of what you're saying, clarification, avoiding miscommunications, etc. \n "
-
-        embed = discord.Embed(title='Tone tags', description=introduction, color=0xFF0000)
-
-        for tone_tag in dictionary.tone_tags:
-            embed.add_field(name=tone_tag[0], value=tone_tag[1], inline=True)
+        tonetagcog = bot.get_cog("ToneTagCog")
+        embed = await tonetagcog.general_explanation()
         await message.channel.send(embed=embed)
 
 
