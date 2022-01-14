@@ -76,6 +76,7 @@ async def on_ready():
     global cogs, drive, http
     cogs = await cogs_load()
     if cogs != {}:
+        logging.warning(cogs)
         drive, http = await connect_to_google_drive(guild)
         await cogs['SearchCog'].assign_cogs_and_connect(cogs, app_id)
     else:
