@@ -39,9 +39,10 @@ class GoogleDriveCog(commands.Cog):
             logging.warning("Authorisation complete")
         elif gauth.access_token_expired:
             # ᕙ(`-´)ᕗ Refresh them if expired
+            logging.warning(gauth.Refresh())
+
             # (ㆆ_ㆆ) Does not Refresh yet?
-            open('./credentials/mycreds.txt', 'w').close()
-            logging.warning("refresh")
+
         else:
             # ᕙ(`-´)ᕗ Initialize the saved creds
             gauth.Authorize()
