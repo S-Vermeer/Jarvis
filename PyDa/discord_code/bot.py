@@ -25,19 +25,25 @@ intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the memb
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
-cog_names = ["googledrive", "tonetag", "usercommunication"]
+cog_names = [["googledrive", "GoogleDriveCog"],
+             ["tonetag", "ToneTagCog"],
+             ["usercommunication", "UserCommunicationCog"],
+             ["wellbeing", "WellbeingCog"]]
 
 
 async def cogs_load():
+    cogs = {}
     for cog in cog_names:
-        bot.load_extension(f"cogs.modules.{cog}")
-        print(f"{cog} cog loaded")
+        bot.load_extension(f"cogs.modules.{cog[0]}")
+        print(f"{cog[0]} cog loaded")
+        cogs[cog[1]] = bot.get_cog(cog[1])
     print("cogs setup complete")
+    return cogs
 
 
-async def connect_to_google_drive(guild, communication):
-    drive_cog = bot.get_cog("GoogleDriveCog")
-    return await drive_cog.drive_connect(guild, communication)
+async def connect_to_google_drive(guild):
+    com_cog = current_globals['cogs']['UserCommunicationCog']
+    return await current_globals['cogs']['GoogleDriveCog'].drive_connect(guild, com_cog)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -53,8 +59,7 @@ def get_env_var():
 TOKEN, GUILD, app_id = get_env_var()
 
 # ᕙ(`-´)ᕗ Global variables that are assigned when the google drive is connected
-drive = None
-http = None
+current_globals = {'drive': None, 'http': None, 'cogs': {}}
 
 
 # ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
@@ -67,10 +72,12 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})\n'
     )
     logging.warning(f"There are {str(len(guild.members))} guild members")
-    await cogs_load()
-    communication_cog = bot.get_cog("UserCommunicationCog")
-    global drive, http
-    drive, http = await connect_to_google_drive(guild, communication_cog)
+    global current_globals
+    current_globals['cogs'] = await cogs_load()
+    current_globals['drive'], current_globals['http'] = await connect_to_google_drive(guild)
+    current_globals['app_id'] = app_id
+    current_globals['bot'] = bot
+    discordcommands.init(current_globals)
     logging.warning("ready")
 
 
@@ -86,7 +93,7 @@ async def on_message(message):
         if message.author == bot.user:
             return
         # ᕙ(`-´)ᕗ See whether one of the bots names was called
-        await discordcommands.calling_command(message, bot, app_id, drive, http)
+        await calling_command(message)
 
         # ᕙ(`-´)ᕗ These are various options that work without having to say the name first
         await stop(message)
@@ -150,21 +157,18 @@ async def help_msg(message):
 
 # ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
 async def tone_tags(message):
-    if message.content.lower() == 'tonetags':
-        tonetagcog = bot.get_cog("ToneTagCog")
-        embed = await tonetagcog.general_explanation()
-        await message.channel.send(embed=embed)
+    await current_globals['cogs']['ToneTagCog'].general_explanation(message)
 
 
-# ᕙ(`-´)ᕗ Check whether the message was sent by the requester
-def check(author):
-    def inner_check(message):
-        if message.author != author:
-            return False
-        else:
-            return True
-
-    return inner_check
+# ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
+async def calling_command(message):
+    for name in dictionary.phillip_names:
+        if message.content.lower() == name:
+            response = 'At your service'
+            await message.channel.send(response)
+            msg = await current_globals['cogs']['UserCommunicationCog'].require_response(message)
+            method = await discordcommands.search_method(msg)
+            await method
 
 
 bot.run(TOKEN)

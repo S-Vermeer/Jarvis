@@ -49,6 +49,32 @@ class UserCommunicationCog(commands.Cog):
         await member.create_dm()
         await member.dm_channel.send(message)
 
+    @commands.command()
+    # ᕙ(`-´)ᕗ Send something but need a response to continue
+    async def require_response(self, message):
+        try:
+            await message.add_reaction('👍')
+
+            def author_check(author):
+
+                def inner_check(message_to_check):
+                    if message_to_check.author != author:
+                        return False
+                    else:
+                        return True
+
+                return inner_check
+
+            msg = await self.bot.wait_for('message', check=author_check(message.author), timeout=15)
+            return msg
+
+        except Exception as e:
+            await message.remove_reaction('👍', self.bot.user)
+            logging.warning(repr(e))
+
+
+
+
 
 def setup(bot):
     bot.add_cog(UserCommunicationCog(bot))

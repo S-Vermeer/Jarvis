@@ -14,19 +14,21 @@ class ToneTagCog(commands.Cog):
         self.guild = guild
 
     @commands.command()
-    async def general_explanation(self):
-        introduction = "tone tags / tone indicators are things you can include with text to indicate what the tone of " \
-                       "it is. Some people have difficulty picking up on tone. communicating through text only " \
-                       "makes this harder due to lack of audio and physical clues (voice inflection, body language, " \
-                       "facial expressions, etc.) Tagging what tone you are using can be very helpful for others " \
-                       "understanding of what you're saying, clarification, avoiding miscommunications, etc. \n "
+    async def general_explanation(self, message):
+        if message.content.lower() == 'tonetags':
+            introduction = "tone tags / tone indicators are things you can include with text to indicate what the " \
+                           "tone of it is. Some people have difficulty picking up on tone. communicating through text "\
+                           "only makes this harder due to lack of audio and physical clues (voice inflection, " \
+                           "body language, facial expressions, etc.) Tagging what tone you are using can be very " \
+                           "helpful for others understanding of what you're saying, clarification, avoiding " \
+                           "miscommunications, etc. \n "
 
-        embed = discord.Embed(title='Tone tags', description=introduction, color=0xFF0000)
+            embed = discord.Embed(title='Tone tags', description=introduction, color=0xFF0000)
 
-        for tone_tag in dictionary.tone_tags:
-            embed.add_field(name=tone_tag[0], value=tone_tag[1], inline=True)
+            for tone_tag in dictionary.tone_tags:
+                embed.add_field(name=tone_tag[0], value=tone_tag[1], inline=True)
 
-        return embed
+            await message.channel.send(embed=embed)
 
     @commands.command()
     async def specific_explanation(self, message):
@@ -44,7 +46,10 @@ class ToneTagCog(commands.Cog):
             for tone_tag in dictionary.tone_tags:
                 if tone_tag[0].lower().count(split_message[msg]) >= 1:
                     response += f"{ tone_tag[0] } = { tone_tag[1] } \n"
-        return response
+
+        if response == "The following tone tags are possible: \n":
+            response = "Unfortunately I could not find a tone tag matching this"
+        return message.channel.send(response)
 
     @commands.Cog.listener()
     async def on_ready(self):

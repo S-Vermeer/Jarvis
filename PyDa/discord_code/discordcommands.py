@@ -4,138 +4,82 @@ Comment legend
 ʕ•́ᴥ•̀ʔっ - To do
 (ㆆ_ㆆ) - Bug
 """
-import asyncio
 import logging
 
 import wikipedia as wp
 import wolframalpha as wa
 
-import random
+from discord.ext import commands
 
-import assets.dictionary as dictionary
-from discord.ext import tasks
+drive = None
+http = None
+cogs = None
+app_id = None
+bot = commands.Bot(command_prefix="")
+
+
+def init(current_globals):
+    global drive
+    global http
+    global cogs
+    global app_id
+    global bot
+    drive = current_globals['drive']
+    http = current_globals['http']
+    cogs = current_globals['cogs']
+    bot = current_globals['bot']
+    app_id = current_globals['app_id']
 
 
 # ᕙ(`-´)ᕗ Connect to the wolfram alpha client
-def connect_wa(app_id):
+def connect_wa():
     client = wa.Client(app_id)
     return client
 
 
 # ᕙ(`-´)ᕗ Check which action is asked for after phillip is called
-async def search_method(msg, message, app_id, bot):
-    if msg.content.lower().count("how are you") >= 1:
-        return wellbeing(message)
+async def search_method(message):
+    if message.content.lower().count("how are you") >= 1:
+        return cogs['WellbeingCog'].mood(message)
 
-    if msg.content.lower().count("search") >= 1:
-        return search_answer(message, msg, app_id, bot)
+    if message.content.lower().count("search") >= 1:
+        return search_answer(message)
 
-    if msg.content.lower().count("sleep") >= 1:
-        return sleep_helper(msg)
+    if message.content.lower().count("sleep") >= 1:
+        return cogs['WellbeingCog'].sleep_helper(message)
 
-    if msg.content.lower().count("hype") >= 1:
-        return complimenter(msg)
+    if message.content.lower().count("hype") >= 1:
+        return cogs['WellbeingCog'].complimenter(message)
 
-    if msg.content.lower().count("jesse") >= 1:
-        return jesse_hype(msg)
+    if message.content.lower().count("jesse") >= 1:
+        return jesse_hype(message)
 
-    if msg.content.lower().count("drive") >= 1:
-        return drive_command(msg, bot)
+    if message.content.lower().count("drive") >= 1:
+        return await cogs["GoogleDriveCog"].drive_functions(message)
 
-    if msg.content.lower().count("morning") >= 1:
-        com_cog = bot.get_cog("UserCommunicationCog")
-        return good_morning(msg.guild, com_cog)
+    if message.content.lower().count("morning") >= 1:
+        return good_morning(message.guild, cogs['UserCommunicationCog'])
 
-    if msg.content.lower().count("tone") and msg.content.lower().count("/") >= 1:
-        return tone_check(msg, bot)
-
-drive = None
-http = None
-
-
-# ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
-async def calling_command(message, bot, app_id, currentdrive, currenthttp):
-    global drive
-    global http
-    drive = currentdrive
-    http = currenthttp
-    for name in dictionary.phillip_names:
-        if message.content.lower() == name:
-            response = 'At your service'
-            await message.channel.send(response)
-            try:
-                # ᕙ(`-´)ᕗ this is added to see whether Phillip is still listening
-                await message.add_reaction('👍')
-
-                def check_author(author):
-                    # ᕙ(`-´)ᕗ Check whether the person who sent sent the request for phillip, is also the one the
-                    # message is from
-                    def inner_check(message_to_check):
-                        if message_to_check.author != author:
-                            return False
-                        else:
-                            return True
-
-                    return inner_check
-
-                msg = await bot.wait_for('message', check=check_author(message.author), timeout=15)
-                method = await search_method(msg, message, app_id, bot)
-                await method
-
-            except asyncio.exceptions.TimeoutError as e:
-                await message.remove_reaction('👍', bot.user)
-                logging.warning("warning: " + repr(e))
-
-
-# ᕙ(`-´)ᕗ How is Phillip doing?
-async def wellbeing(message):
-    response = 'Well I can respond, that\'s something'  # ʕ•́ᴥ•̀ʔっ More responses to how Phillip is doing
-    await message.channel.send(response)
-
-
-# ᕙ(`-´)ᕗ Prompts someone who is tagged to sleep
-async def sleep_helper(message):
-    response = (random.choice(dictionary.sleep_encouragements) % message.mentions[0].mention)
-    await message.channel.send(response)
-
-
-# ᕙ(`-´)ᕗ Compliments someone who is tagged
-async def complimenter(message):
-    response = (random.choice(dictionary.compliments) % message.mentions[0].nick)
-    await message.channel.send(response)
+    if message.content.lower().count("tone") and message.content.lower().count("/") >= 1:
+        return await cogs['ToneTagCog'].specific_explanation(message)
 
 
 # ᕙ(`-´)ᕗ Hypes Jesse, a mod from the Avieno discord
 async def jesse_hype(message):
     uid = '<@745738275968516176>'
     response = (
-            ":regional_indicator_w: :regional_indicator_e:   :regional_indicator_l: :regional_indicator_o: "
-            ":regional_indicator_v: :regional_indicator_e:   :regional_indicator_j: :regional_indicator_e: "
-            ":regional_indicator_s: :regional_indicator_s: :regional_indicator_e: \n Hey " + uid + ", we wanna remind "
-                                                                                                   "you that we love "
-                                                                                                   "you! \n Here have "
-                                                                                                   "some love from "
-                                                                                                   "the fan club! \n "
-                                                                                                   ":partying_face: "
-                                                                                                   ":heart: "
-                                                                                                   ":orange_heart: "
-                                                                                                   ":yellow_heart: "
-                                                                                                   ":green_heart: "
-                                                                                                   ":blue_heart: "
-                                                                                                   ":purple_heart: "
-                                                                                                   ":blue_heart: "
-                                                                                                   ":green_heart: "
-                                                                                                   ":yellow_heart: "
-                                                                                                   ":orange_heart: "
-                                                                                                   ":heart: "
-                                                                                                   ":partying_face:")
+            f":regional_indicator_w: :regional_indicator_e:   :regional_indicator_l: :regional_indicator_o: "
+            f":regional_indicator_v: :regional_indicator_e:   :regional_indicator_j: :regional_indicator_e: "
+            f":regional_indicator_s: :regional_indicator_s: :regional_indicator_e: \n Hey { uid }, we wanna remind "
+            f"you that we love you! \n Here have some love from the fan club! \n :partying_face: :heart: "
+            f":orange_heart: :yellow_heart: :green_heart: :blue_heart: :purple_heart: :blue_heart: :green_heart: "
+            f":yellow_heart: :orange_heart: :heart: :partying_face:")
     await message.channel.send(response)
 
 
 # ᕙ(`-´)ᕗ Search for the answer of a question on wikipedia and wolframalpha
-async def search_answer(message, msg, app_id, bot):
-    answer = search_internet(msg.content, app_id)
-
+async def search_answer(message):
+    answer = search_internet(message.content)
     msg = await message.channel.send(answer[0])
 
     # ᕙ(`-´)ᕗ If there is more than one answer, an additional answer can be gotten through reacting with a thumbs up
@@ -148,15 +92,9 @@ async def search_answer(message, msg, app_id, bot):
                 await message.channel.send(answer[1])
 
 
-# ᕙ(`-´)ᕗ Select one of the drive commands
-async def drive_command(message, bot):
-    drive_cog = bot.get_cog("GoogleDriveCog")
-    await drive_cog.drive_functions(message)
-
-
 # ᕙ(`-´)ᕗ Search the internet for a response on the inputted query
-def search_internet(input_query, app_id):
-    client = connect_wa(app_id)
+def search_internet(input_query):
+    client = connect_wa()
     no_results = "No results"
     try:  # ᕙ(`-´)ᕗ Try to get results for both Wiki and Wolfram
         res = client.query(input_query)
@@ -193,30 +131,6 @@ def search_internet(input_query, app_id):
         return no_results
 
 
-# ᕙ(`-´)ᕗ Send something but need a response to continue
-async def require_response(message, bot, app_id):
-    try:
-        await message.add_reaction('👍')
-
-        def author_check(author):
-
-            def inner_check(message_to_check):
-                if message_to_check.author != author:
-                    return False
-                else:
-                    return True
-
-            return inner_check
-
-        msg = await bot.wait_for('message', check=author_check(message.author), timeout=15)
-        method = await search_method(msg, message, app_id, bot)
-        await method
-
-    except Exception as e:
-        await message.remove_reaction('👍', bot.user)
-        logging.warning(repr(e))
-
-
 # ᕙ(`-´)ᕗ Sends a good morning message to whoever requests it at a certain time
 async def good_morning(guild, com_cog):
     uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
@@ -224,23 +138,3 @@ async def good_morning(guild, com_cog):
     skyler = guild.get_member(uid)
     morning_message = "good morning test"
     await com_cog.dm_member(skyler, morning_message)
-
-
-# ᕙ(`-´)ᕗ Check the tone tags based on your own message
-async def tone_check(message, bot):
-    tonetagcog = bot.get_cog("ToneTagCog")
-    response = await tonetagcog.specific_explanation(message)
-    await message.channel.send(response)
-
-
-# ᕙ(`-´)ᕗ Attempt to start a task every x amount of time
-@tasks.loop(seconds=10)
-async def called_every_five_min():
-    logging.warning("called")
-
-
-# ᕙ(`-´)ᕗ Something that happens before the loop starts
-@called_every_five_min.before_loop
-async def before_printer(self):
-    logging.warning('waiting...')
-    await self.bot.wait_until_ready()
