@@ -24,6 +24,8 @@ class GoogleDriveCog(commands.Cog):
         GoogleAuth.DEFAULT_SETTINGS['client_config_file'] = "credentials/client_secrets.json"
         gauth = GoogleAuth()
 
+        self.com_cog = user_communication
+
         gauth.LoadCredentialsFile("./credentials/mycreds.txt")  # ᕙ(`-´)ᕗ Load credentials, if any (hidden in github)
         if gauth.credentials is None:
             # ᕙ(`-´)ᕗ Get the url that the user must use to give access to google drive
@@ -56,7 +58,6 @@ class GoogleDriveCog(commands.Cog):
         # ᕙ(`-´)ᕗ Create httplib.Http() object.
         http_obj = gdrive.auth.Get_Http_Object()
         self.drive = gdrive
-        self.com_cog = user_communication
         await self.get_folder_id(guild)
         return gdrive, http_obj
 
