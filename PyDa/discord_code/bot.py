@@ -67,7 +67,7 @@ async def on_ready():
         f'{bot.user} is connected to the following guild:\n'
         f'{guild.name}(id: {guild.id})\n'
     )
-    logging.warning(f"There are { str(len(guild.members)) } guild members")
+    logging.warning(f"There are {str(len(guild.members))} guild members")
     global drive, http
     drive, http = await connect_to_google_drive(guild)
     logging.warning("ready")
@@ -105,7 +105,7 @@ async def on_reaction_add(reaction, user):
     if GUILD == reaction.message.guild.name and user != bot.user and \
             reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
         # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
-        response = f"You requested tone tag information about: { reaction.message.content } \n"
+        response = f"You requested tone tag information about: {reaction.message.content} \n"
         response += await discordcommands.tone_check(reaction.message)
         await discordcommands.dm_member(user, response)
 
@@ -137,20 +137,26 @@ async def b99(message):
 # ᕙ(`-´)ᕗ Phillip sends a list of all the different things they can do.
 async def help_msg(message):
     if message.content.lower() == 'help':
-        response = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below.\nYou don't have to call my " \
-                   "name for me to listen to the following functions: \n "
+        introduction = "Hello, my name is P.H.I.L.L.I.P. I'll explain what I can do below."
+        embed = discord.Embed(title='Phillip help list', description=introduction, color=0xFF0000)
+
+        no_name_function = "\nYou don't have to call my name for me to listen to the following functions: \n"
+
+        embed.add_field(name="No name", value=no_name_function, inline=False)
 
         for function in dictionary.always_functions:
-            response = response + function[0] + "```" + function[1] + "```" + "\n"
+            embed.add_field(name=function[0], value=function[1], inline=True)
 
-        response = response + "\n If you call me (using one of the names listed in 'names') I will start listening " \
-                              "for more commands.\nI will be listening for the first message you sent after you call " \
-                              "me for 15 seconds, if you do not respond before that time I'll remove the reaction " \
-                              "under your calling message.\nThe commands I will be listening for are the following: \n "
+        called_name_function = "\n If you call me (using one of the names listed in 'names') I will start listening " \
+                               "for more commands.I will be listening for the first message you sent after you call " \
+                               "me for 15 seconds, if you do not respond before that time I'll remove the reaction " \
+                               "under your calling message.The commands I will be listening for are the following: \n"
+        embed.add_field(name="Name called", value=called_name_function, inline=False)
 
         for function in dictionary.on_call_functions:
-            response = response + function[0] + "```" + function[1] + "```" + "\n"
-        await message.channel.send(response)
+            embed.add_field(name=function[0], value=function[1], inline=True)
+
+    await message.channel.send(embed=embed)
 
 
 # ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
