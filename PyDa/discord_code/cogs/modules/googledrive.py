@@ -34,7 +34,7 @@ class GoogleDriveCog(commands.Cog):
             uid = 245989473408647171  # ᕙ(`-´)ᕗ Skyler (Developer) User ID so the message is DMed to them
 
             skyler = guild.get_member(uid)
-            msg = await self.com_cog.dm_member_wait_for_response(skyler, auth_url, self.bot)
+            msg = await self.com_cog.dm_member_wait_for_response(skyler, auth_url)
 
             logging.warning(msg.content)
             gauth.Auth(msg.content)
