@@ -16,7 +16,6 @@ from discord.ext.commands import bot
 
 from dotenv import load_dotenv
 
-import discordcommands
 import assets.dictionary as dictionary
 
 # ᕙ(`-´)ᕗ Discord.py requires intents to open the relevant gateways to make sure only the events you need get triggered.
@@ -26,13 +25,14 @@ intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
 cog_names = [["googledrive", "GoogleDriveCog"],
-             ["tonetag", "ToneTagCog"],
              ["usercommunication", "UserCommunicationCog"],
-             ["wellbeing", "WellbeingCog"]]
+             ["tonetag", "ToneTagCog"],
+             ["wellbeing", "WellbeingCog"],
+             ["search", "SearchCog"]]
+cogs = {}
 
 
 async def cogs_load():
-    cogs = {}
     for cog in cog_names:
         bot.load_extension(f"cogs.modules.{cog[0]}")
         print(f"{cog[0]} cog loaded")
@@ -42,8 +42,8 @@ async def cogs_load():
 
 
 async def connect_to_google_drive(guild):
-    com_cog = current_globals['cogs']['UserCommunicationCog']
-    return await current_globals['cogs']['GoogleDriveCog'].drive_connect(guild, com_cog)
+    com_cog = cogs['UserCommunicationCog']
+    return await cogs['GoogleDriveCog'].drive_connect(guild, com_cog)
 
 
 # ᕙ(`-´)ᕗ Get information from the .env file (hidden in the github)
@@ -59,7 +59,8 @@ def get_env_var():
 TOKEN, GUILD, app_id = get_env_var()
 
 # ᕙ(`-´)ᕗ Global variables that are assigned when the google drive is connected
-current_globals = {'drive': None, 'http': None, 'cogs': {}}
+drive = None
+http = None
 
 
 # ᕙ(`-´)ᕗ When the bot is done with setting up the basics and logging this is triggered
@@ -72,12 +73,10 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})\n'
     )
     logging.warning(f"There are {str(len(guild.members))} guild members")
-    global current_globals
-    current_globals['cogs'] = await cogs_load()
-    current_globals['drive'], current_globals['http'] = await connect_to_google_drive(guild)
-    current_globals['app_id'] = app_id
-    current_globals['bot'] = bot
-    discordcommands.init(current_globals)
+    global cogs, drive, http
+    cogs = await cogs_load()
+    drive, http = await connect_to_google_drive(guild)
+    await cogs['SearchCog'].assign_cogs_and_connect(cogs, app_id)
     logging.warning("ready")
 
 
@@ -157,7 +156,7 @@ async def help_msg(message):
 
 # ᕙ(`-´)ᕗ Shows information about tone tags and the different optionsS
 async def tone_tags(message):
-    await current_globals['cogs']['ToneTagCog'].general_explanation(message)
+    await cogs['ToneTagCog'].general_explanation(message)
 
 
 # ᕙ(`-´)ᕗ This is what happens after one of Phillip's names is said
@@ -166,9 +165,10 @@ async def calling_command(message):
         if message.content.lower() == name:
             response = 'At your service'
             await message.channel.send(response)
-            msg = await current_globals['cogs']['UserCommunicationCog'].require_response(message)
-            method = await discordcommands.search_method(msg)
-            await method
+            msg = await cogs['UserCommunicationCog'].require_response(message)
+            await cogs['SearchCog'].called_function_search(msg)
+            # method =
+            # await method
 
 
 bot.run(TOKEN)

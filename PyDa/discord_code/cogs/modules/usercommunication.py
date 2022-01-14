@@ -73,9 +73,6 @@ class UserCommunicationCog(commands.Cog):
             logging.warning(repr(e))
 
 
-
-
-
 def setup(bot):
     bot.add_cog(UserCommunicationCog(bot))
     print("  UserCommunicationCog added")

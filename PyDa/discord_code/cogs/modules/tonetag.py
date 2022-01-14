@@ -1,9 +1,9 @@
+import logging
 import os
 
 import discord
 from discord.ext import commands
 
-import discordcommands
 import assets.dictionary as dictionary
 from dotenv import load_dotenv
 
@@ -12,6 +12,7 @@ class ToneTagCog(commands.Cog):
     def __init__(self, bot, guild):
         self.bot = bot
         self.guild = guild
+        self.com_cog = None
 
     @commands.command()
     async def general_explanation(self, message):
@@ -49,7 +50,8 @@ class ToneTagCog(commands.Cog):
 
         if response == "The following tone tags are possible: \n":
             response = "Unfortunately I could not find a tone tag matching this"
-        return message.channel.send(response)
+
+        return response
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -67,12 +69,13 @@ class ToneTagCog(commands.Cog):
                 reaction.emoji == "🧐" and reaction.message.content.count("/") >= 1:
             # ᕙ(`-´)ᕗ You receive a DM with information about the tone tags in the message reacted to.
             response = f"You requested tone tag information about: {reaction.message.content} \n"
-            response += await discordcommands.tone_check(reaction.message)
-            await discordcommands.dm_member(user, response)
+            response += await self.specific_explanation(reaction.message)
+            await self.com_cog.dm_member(user, response)
 
 
 def setup(bot):
     load_dotenv()
     guild = os.getenv('DISCORD_GUILD')
     bot.add_cog(ToneTagCog(bot, guild))
+    bot.get_cog("UserCommunicationCog")
     print("  ToneTagCog added")
