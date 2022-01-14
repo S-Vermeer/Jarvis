@@ -75,8 +75,11 @@ async def on_ready():
     logging.warning(f"There are {str(len(guild.members))} guild members")
     global cogs, drive, http
     cogs = await cogs_load()
-    drive, http = await connect_to_google_drive(guild)
-    await cogs['SearchCog'].assign_cogs_and_connect(cogs, app_id)
+    if cogs != {}:
+        drive, http = await connect_to_google_drive(guild)
+        await cogs['SearchCog'].assign_cogs_and_connect(cogs, app_id)
+    else:
+        logging.warning("cogs empty")
     logging.warning("ready")
 
 
