@@ -11,7 +11,6 @@ def get_audio():
             spoken = r.recognize_google(audio)
         except Exception as e:
             print(repr(e))
-    print("Here")
     print(spoken.lower())
     return spoken.lower()
 

@@ -5,29 +5,26 @@ Comment legend
 (ㆆ_ㆆ) - Bug
 """
 import PySimpleGUI as sg
-import pyttsx3
 from modules.speech import speech_input as si
 from modules.speech import speech_output as so
 
 directory = r"C:\Users\Public\Documents\Github\Jarvis\PyDa\application"
 sound_on_img = directory + r"\assets\sound_on.png"
+sound_off_img = directory + r"\assets\sound_off.png"
 
-# ᕙ(`▿´)ᕗ Text To Speech setup
-# engine = pyttsx3.init()
+sound_on = True
 
-# ʕ•́ᴥ•̀ʔっ Allow the sound to be switched off ʕ•́ᴥ•̀ʔっ
-# sound_off_img = directory + r"\assets\sound_off.png"
-# sound = True
 
-# def switch_sound_img(event):
-#     if sound:
-#         sound_img = sound_off_img
-#         # sound = False
-#     else:
-#         sound_img = sound_on_img
-#         # sound = True
-#     element = window[event]
-#     element.update(image_filename=f'{sound_img}', image_subsample=6)
+def switch_sound_img():
+    global sound_on
+    if sound_on:
+        sound_img = sound_off_img
+        sound_on = False
+    else:
+        sound_img = sound_on_img
+        sound_on = True
+    element = window['sound_button']
+    element.update(image_filename=f'{sound_img}', image_subsample=6)
 
 
 sg.theme('SystemDefault1')  # ᕙ(`▿´)ᕗ Get the specific theme [Light/Dark][Colour][number optional] ᕙ(`▿´)ᕗ
@@ -42,7 +39,7 @@ layout = [
     [sg.Button("", image_filename=f'{phillip_image_sleeping}', image_subsample=2, key='phillip_image')],
     [sg.Text('Enter a command'), sg.InputText(key='command_input')],
     [sg.Button('Ok'), sg.Button('Cancel'), sg.Button('', image_filename=f'{sound_on_img}',
-                                                     image_subsample=6)],
+                                                     image_subsample=6, key='sound_button')],
 
 ]
 
@@ -58,23 +55,22 @@ while True:
     if event == 'phillip_image':
         if not awake:
             window['phillip_image'].update(image_filename=f'{phillip_image}', image_subsample=2)
-            window['response-ML'].update(so.speak("Thanks for waking me"), justification='center', autoscroll=True,
-                                         disabled=True)
+            window['response-ML'].update("Thanks for waking me")
+            if sound_on:
+                so.speak("Thanks for waking me")
             awake = True
         else:
-            window['response-ML'].update(so.speak("No need to poke me"), justification='center', autoscroll=True,
-                                         disabled=True)
-            command_input = si.get_audio()
-            window['command_input'].update(command_input)
+            window['response-ML'].update("No need to poke me")
+            if sound_on:
+                so.speak("No need to poke me")
+            # command_input = si.get_audio()
+            # window['command_input'].update(command_input)
+    if event == 'sound_button':
+        switch_sound_img()
 
-        # window['command_input'].update(si.get_audio())
-        # window['command_input'].update("Test")
+    if event == 'Ok':
+        window['response-ML'].update(values['command_input'])
+        window['command_input'].update("")
 
-
-# window['response-ML'].update(si.get_audio())
-
-# ʕ•́ᴥ•̀ʔっ Allow the sound to be switched off ʕ•́ᴥ•̀ʔっ
-# if event == '':
-# switch_sound_img(event)
 
 window.close()
