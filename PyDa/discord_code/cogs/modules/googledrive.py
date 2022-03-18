@@ -97,7 +97,7 @@ class GoogleDriveCog(commands.Cog):
         if flag:
             await message.channel.send(list_msg)
         if not flag:
-            message.channel.send('Sorry! no file found...')
+            await message.channel.send('Sorry! no file found...')
 
     # ᕙ(`-´)ᕗ Make a new file and upload it to the drive
     @commands.command()
