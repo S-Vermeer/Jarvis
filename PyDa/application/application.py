@@ -33,6 +33,23 @@ phillip_image_sleeping = directory + r"\assets\Phillip_image_sleeping.png"
 phillip_image = directory + r"\assets\Phillip_image.png"
 awake = False
 
+
+def wake_phillip():
+    global awake
+    if not awake:
+        window['phillip_image'].update(image_filename=f'{phillip_image}', image_subsample=2)
+        window['response-ML'].update("Thanks for waking me")
+        if sound_on:
+            so.speak("Thanks for waking me")
+        awake = True
+    else:
+        window['response-ML'].update("No need to poke me")
+        if sound_on:
+            so.speak("No need to poke me")
+        # command_input = si.get_audio()
+        # window['command_input'].update(command_input)
+
+
 layout = [
     [sg.Multiline("Ask me a question :)", justification='center', autoscroll=True, disabled=True,
                   expand_x=True, key='response-ML')],
@@ -53,18 +70,8 @@ while True:
         break
 
     if event == 'phillip_image':
-        if not awake:
-            window['phillip_image'].update(image_filename=f'{phillip_image}', image_subsample=2)
-            window['response-ML'].update("Thanks for waking me")
-            if sound_on:
-                so.speak("Thanks for waking me")
-            awake = True
-        else:
-            window['response-ML'].update("No need to poke me")
-            if sound_on:
-                so.speak("No need to poke me")
-            # command_input = si.get_audio()
-            # window['command_input'].update(command_input)
+        wake_phillip()
+
     if event == 'sound_button':
         switch_sound_img()
 
@@ -74,3 +81,4 @@ while True:
 
 
 window.close()
+
