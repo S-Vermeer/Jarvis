@@ -19,7 +19,7 @@ def morning_message():
 
 
 def schedule_morning_msg():
-    schedule.every().day.at("7:00").do(morning_message)
+    schedule.every().day.at("07:00").do(morning_message)
     run_continuously(1)
 
 

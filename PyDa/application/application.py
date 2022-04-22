@@ -23,7 +23,6 @@ def switch_sound_img():
         sound_on = False
     else:
         sound_img = sound_on_img
-        sm.morning_message()
         sound_on = True
     element = window['sound_button']
     element.update(image_filename=f'{sound_img}', image_subsample=6)
@@ -70,7 +69,7 @@ while True:
     event, values = window.read()
 
     if event == sg.WIN_CLOSED or event == 'Cancel':  # ᕙ(`▿´)ᕗ if user closes window or clicks cancel ᕙ(`▿´)ᕗ
-        sm.stop_run()
+        sm.stop_run_morning()
         break
 
     if event == 'phillip_image':
