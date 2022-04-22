@@ -24,6 +24,7 @@ intents.members = True  # ᕙ(`-´)ᕗ We want to see information about the memb
 intents.reactions = True  # ᕙ(`-´)ᕗ And when reactions are added etc
 
 bot = commands.Bot(command_prefix="", intents=intents)
+# ᕙ(`-´)ᕗ We need to initialize the cogs, which we needs the names for
 cog_names = [["googledrive", "GoogleDriveCog"],
              ["usercommunication", "UserCommunicationCog"],
              ["tonetag", "ToneTagCog"],
@@ -32,6 +33,7 @@ cog_names = [["googledrive", "GoogleDriveCog"],
 cogs = {}
 
 
+# ᕙ(`-´)ᕗ We load the cogs so we can use them, using their file names and their Cog Names.
 async def cogs_load():
     for cog in cog_names:
         bot.load_extension(f"cogs.modules.{cog[0]}")
@@ -41,6 +43,7 @@ async def cogs_load():
     return cogs
 
 
+# ᕙ(`-´)ᕗ We connect to the google drive using the drive cog
 async def connect_to_google_drive(guild):
     com_cog = cogs['UserCommunicationCog']
     return await cogs['GoogleDriveCog'].drive_connect(guild, com_cog)

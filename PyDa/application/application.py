@@ -7,6 +7,7 @@ Comment legend
 import PySimpleGUI as sg
 from modules.speech import speech_input as si
 from modules.speech import speech_output as so
+from modules.wellbeing import scheduled_messages as sm
 
 directory = r"C:\Users\Public\Documents\Github\Jarvis\PyDa\application"
 sound_on_img = directory + r"\assets\sound_on.png"
@@ -22,6 +23,7 @@ def switch_sound_img():
         sound_on = False
     else:
         sound_img = sound_on_img
+        sm.morning_message()
         sound_on = True
     element = window['sound_button']
     element.update(image_filename=f'{sound_img}', image_subsample=6)
@@ -62,11 +64,13 @@ layout = [
 
 window = sg.Window('P.H.I.L.L.I.P.', layout, element_justification='c',
                    finalize=True)  # ᕙ(`▿´)ᕗ Create the Window ᕙ(`▿´)ᕗ
+
 # ᕙ(`▿´)ᕗ Event Loop to process "events" and get the "values" of the inputs ᕙ(`▿´)ᕗ
 while True:
     event, values = window.read()
 
     if event == sg.WIN_CLOSED or event == 'Cancel':  # ᕙ(`▿´)ᕗ if user closes window or clicks cancel ᕙ(`▿´)ᕗ
+        sm.stop_run()
         break
 
     if event == 'phillip_image':
@@ -78,7 +82,7 @@ while True:
     if event == 'Ok':
         window['response-ML'].update(values['command_input'])
         window['command_input'].update("")
-
+        if values['command_input'] == 'schedule':
+            sm.schedule_morning_msg()
 
 window.close()
-
