@@ -9,6 +9,7 @@ phillip_image = directory + r"\assets\Phillip_image.ico"
 
 morning_active = False
 
+
 def morning_message():
     notification.notify(
         title='Morning',
@@ -19,7 +20,8 @@ def morning_message():
 
 
 def schedule_morning_msg():
-    schedule.every().day.at("07:00").do(morning_message)
+    # schedule.every().day.at("07:00").do(morning_message)
+    schedule.every().minute.do(morning_message)
     run_continuously(1)
 
 

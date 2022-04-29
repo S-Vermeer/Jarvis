@@ -114,6 +114,7 @@ async def stop(message):
     # ᕙ(`-´)ᕗ The message has to be solely stop, so it when it is said in a sentence it isn't triggered
     if message.content.lower() == 'stop':
         await message.channel.send('Shutting down')
+        # cogs['WellbeingCog'].morning_active = False
         await bot.close()  # (ㆆ_ㆆ) Gives RuntimeError: Event loop is closed, so it works but probably not exactly
 
 
